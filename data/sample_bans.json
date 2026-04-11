@@ -1,0 +1,354 @@
+{
+  "bans": [
+    {
+      "user_id": "USR-44821",
+      "ban_reason": "Use of third-party aim assistance software detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-18"
+    },
+    {
+      "user_id": "USR-55190",
+      "ban_reason": "Use of wallhack/ESP overlay detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-28"
+    },
+    {
+      "user_id": "USR-29571",
+      "ban_reason": "Abnormal gameplay patterns consistent with aim assistance",
+      "detection_method": "aim_lock_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-30"
+    },
+    {
+      "user_id": "USR-83742",
+      "ban_reason": "Third-party software injection detected during gameplay",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-16"
+    },
+    {
+      "user_id": "USR-61234",
+      "ban_reason": "Use of speed modification and aim assistance software",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-25"
+    },
+    {
+      "user_id": "USR-78301",
+      "ban_reason": "Unauthorized software injection detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-26"
+    },
+    {
+      "user_id": "USR-39402",
+      "ban_reason": "Abnormal accuracy patterns exceeding statistical thresholds",
+      "detection_method": "stat_anomaly",
+      "ban_duration": "30 days",
+      "ban_date": "2026-03-26"
+    },
+    {
+      "user_id": "USR-42887",
+      "ban_reason": "Memory manipulation detected during active gameplay session",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-28"
+    },
+    {
+      "user_id": "USR-50123",
+      "ban_reason": "Connection manipulation and abnormal packet behavior",
+      "detection_method": "connection_manipulation",
+      "ban_duration": "30 days",
+      "ban_date": "2026-03-16"
+    },
+    {
+      "user_id": "USR-18745",
+      "ban_reason": "Use of third-party aim assistance software detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-28"
+    },
+    {
+      "user_id": "USR-67890",
+      "ban_reason": "Use of aim assistance software detected during active session",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-17"
+    },
+    {
+      "user_id": "USR-22334",
+      "ban_reason": "Abnormal gameplay patterns and accuracy spikes",
+      "detection_method": "stat_anomaly",
+      "ban_duration": "30 days",
+      "ban_date": "2026-03-16"
+    },
+    {
+      "user_id": "USR-91024",
+      "ban_reason": "Aim behavior consistent with software assistance",
+      "detection_method": "aim_lock_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-19"
+    },
+    {
+      "user_id": "USR-35678",
+      "ban_reason": "Automated input patterns detected (macro/scripting)",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "30 days",
+      "ban_date": "2026-03-29"
+    },
+    {
+      "user_id": "USR-48291",
+      "ban_reason": "Exploitation of map geometry for unfair advantage",
+      "detection_method": "manual_review",
+      "ban_duration": "7 days",
+      "ban_date": "2026-03-19"
+    },
+    {
+      "user_id": "USR-73456",
+      "ban_reason": "Use of third-party cheat software suite detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-22"
+    },
+    {
+      "user_id": "USR-66012",
+      "ban_reason": "Use of ESP/wallhack overlay detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-29"
+    },
+    {
+      "user_id": "USR-88431",
+      "ban_reason": "Hardware ID linked to previously banned cheat software user",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-30"
+    },
+    {
+      "user_id": "USR-19283",
+      "ban_reason": "Use of aim assistance software detected in multiple sessions",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-29"
+    },
+    {
+      "user_id": "USR-40571",
+      "ban_reason": "Aim behavior patterns consistent with software assistance",
+      "detection_method": "aim_lock_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-26"
+    },
+    {
+      "user_id": "USR-10234",
+      "ban_reason": "Third-party software detected during gameplay session",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-26"
+    },
+    {
+      "user_id": "USR-52918",
+      "ban_reason": "Abnormal accuracy and headshot ratio exceeding statistical thresholds",
+      "detection_method": "stat_anomaly",
+      "ban_duration": "30 days",
+      "ban_date": "2026-03-20"
+    },
+    {
+      "user_id": "USR-87210",
+      "ban_reason": "Use of wallhack software detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-18"
+    },
+    {
+      "user_id": "USR-33019",
+      "ban_reason": "Third-party cheat software signature detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-30"
+    },
+    {
+      "user_id": "USR-60471",
+      "ban_reason": "Abnormal gameplay patterns and suspicious input behavior",
+      "detection_method": "aim_lock_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-20"
+    },
+    {
+      "user_id": "USR-14823",
+      "ban_reason": "Speed modification detected during PvE session",
+      "detection_method": "speed_hack",
+      "ban_duration": "30 days",
+      "ban_date": "2026-03-26"
+    },
+    {
+      "user_id": "USR-71560",
+      "ban_reason": "Unauthorized process injection detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-17"
+    },
+    {
+      "user_id": "USR-25847",
+      "ban_reason": "Use of wallhack/ESP overlay detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-18"
+    },
+    {
+      "user_id": "USR-94103",
+      "ban_reason": "Use of aim assistance software detected from public terminal",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-16"
+    },
+    {
+      "user_id": "USR-38291",
+      "ban_reason": "Aim behavior exceeding human reaction time thresholds",
+      "detection_method": "aim_lock_detection",
+      "ban_duration": "30 days",
+      "ban_date": "2026-03-19"
+    },
+    {
+      "user_id": "USR-45672",
+      "ban_reason": "Hardware ID associated with confirmed cheat software usage",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-22"
+    },
+    {
+      "user_id": "USR-82104",
+      "ban_reason": "Unauthorized process hooking detected during gameplay",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-26"
+    },
+    {
+      "user_id": "USR-57381",
+      "ban_reason": "Use of third-party aim modification software",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-21"
+    },
+    {
+      "user_id": "USR-20198",
+      "ban_reason": "Suspicious process detected in memory during gameplay",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "30 days",
+      "ban_date": "2026-03-19"
+    },
+    {
+      "user_id": "USR-63748",
+      "ban_reason": "Aim lock patterns detected across multiple matches",
+      "detection_method": "aim_lock_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-25"
+    },
+    {
+      "user_id": "USR-11293",
+      "ban_reason": "Third-party software injection detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-05"
+    },
+    {
+      "user_id": "USR-76540",
+      "ban_reason": "Connection manipulation and location spoofing detected",
+      "detection_method": "connection_manipulation",
+      "ban_duration": "30 days",
+      "ban_date": "2026-04-08"
+    },
+    {
+      "user_id": "USR-49821",
+      "ban_reason": "Use of cheat software detected on system",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-08"
+    },
+    {
+      "user_id": "USR-84562",
+      "ban_reason": "Abnormal aim snap patterns exceeding human capability thresholds",
+      "detection_method": "aim_lock_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-13"
+    },
+    {
+      "user_id": "USR-31054",
+      "ban_reason": "Speed and position manipulation detected",
+      "detection_method": "speed_hack",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-30"
+    },
+    {
+      "user_id": "USR-55029",
+      "ban_reason": "Aim assistance software signatures detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-12"
+    },
+    {
+      "user_id": "USR-72016",
+      "ban_reason": "Third-party overlay software with game memory access detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "30 days",
+      "ban_date": "2026-03-20"
+    },
+    {
+      "user_id": "USR-68347",
+      "ban_reason": "Unauthorized input automation and process hooking detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-22"
+    },
+    {
+      "user_id": "USR-90127",
+      "ban_reason": "Wallhack overlay signatures detected in game process",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-24"
+    },
+    {
+      "user_id": "USR-15738",
+      "ban_reason": "Third-party aim modification software detected",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-04-04"
+    },
+    {
+      "user_id": "USR-43290",
+      "ban_reason": "Cheat software signature detected on system during gameplay",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-28"
+    },
+    {
+      "user_id": "USR-28461",
+      "ban_reason": "Multiple cheat software signatures detected across sessions",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-07"
+    },
+    {
+      "user_id": "USR-59174",
+      "ban_reason": "Use of aim assistance and ESP overlay software",
+      "detection_method": "cheat_engine_detection",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-21"
+    },
+    {
+      "user_id": "USR-37820",
+      "ban_reason": "Suspicious process flagged during routine anti-cheat scan",
+      "detection_method": "new_detection_method",
+      "ban_duration": "permanent",
+      "ban_date": "2026-03-31"
+    },
+    {
+      "user_id": "USR-81645",
+      "ban_reason": "Abnormal movement patterns consistent with speed modification",
+      "detection_method": "speed_hack",
+      "ban_duration": "30 days",
+      "ban_date": "2026-03-29"
+    }
+  ]
+}

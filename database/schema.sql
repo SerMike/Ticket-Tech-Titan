@@ -1,0 +1,1 @@
+-- schema.sql — Raw SQL for all four tables
