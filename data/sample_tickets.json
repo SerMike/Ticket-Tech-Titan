@@ -1,0 +1,504 @@
+{
+  "tickets": [
+    {
+      "ticket_id": "TKT-2025-00236",
+      "user_name": "SneakyPete",
+      "user_id": "USR-11293",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Appeal - first offense, long time player",
+      "ticket_body": "Unban please. I didn't cheat. First offense. Been playing 3 years. Check my stats. Thanks.",
+      "status": "open",
+      "created_at": "2026-04-01T09:53:34"
+    },
+    {
+      "ticket_id": "TKT-2025-00203",
+      "user_name": "Player29571",
+      "user_id": "USR-29571",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Ban appeal - wrongful ban",
+      "ticket_body": "Dear support, I believe my ban was wrongful. I am a loyal player and have never used cheats. Please review my case and unban my account. I have been a member of this community for a long time and I enjoy playing your game. This ban was a mistake and I would appreciate it if you could look into it. Thank you for your time.",
+      "status": "open",
+      "created_at": "2026-04-01T15:17:05"
+    },
+    {
+      "ticket_id": "TKT-2025-00224",
+      "user_name": "xShadowx",
+      "user_id": "USR-33019",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Ban appeal",
+      "ticket_body": "I want to appeal my ban. I did not use any cheats or hacks. I play on a standard setup with no modifications. I don't even know where to find cheats if I wanted to. Please check my account and reverse this ban. I have been a paying customer for 2 years.",
+      "status": "open",
+      "created_at": "2026-04-01T15:43:44"
+    },
+    {
+      "ticket_id": "TKT-2025-00218",
+      "user_name": "HardwareUpgrade",
+      "user_id": "USR-88431",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "New PC build triggered anti-cheat",
+      "ticket_body": "I just built a brand new PC last week. New motherboard, new CPU, new RAM, new SSD - everything is new. I think the hardware ID change from my old system to the new one triggered the anti-cheat. I've seen this exact issue reported on Reddit by other players who recently upgraded. My old account was in good standing with zero issues for 4 years. The timing of the ban perfectly coincides with when I switched hardware. Can you compare the hardware profiles?",
+      "status": "open",
+      "created_at": "2026-04-01T16:40:44"
+    },
+    {
+      "ticket_id": "TKT-2025-00217",
+      "user_name": "SecondChancePlz",
+      "user_id": "USR-66012",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Admitting guilt and asking for reduced ban",
+      "ticket_body": "I'm not going to lie to you - I used an ESP hack for a few days. It was the first time I ever cheated in any game and it will be the last. I felt terrible about it even while doing it. I understand if you keep the ban but I wanted to ask if there's any possibility of reducing it from permanent to a 6-month or 1-year ban. I've invested $400 in this game and I genuinely love the community. I made a stupid mistake and I'm willing to earn back trust however I can.",
+      "status": "open",
+      "created_at": "2026-04-01T17:15:26"
+    },
+    {
+      "ticket_id": "TKT-2025-00214",
+      "user_name": "RetroBlaster",
+      "user_id": "USR-35678",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "I used macros on my mouse - didn't know it was bannable",
+      "ticket_body": "I set up a rapid-fire macro on my Logitech G502 mouse using the Logitech G Hub software. I honestly didn't think this was considered cheating since it's built into the official mouse software. I used it for about a month before getting banned. I've now read the terms of service more carefully and I understand that macros that automate actions are not allowed. I've disabled all macros. I'm not trying to gain an unfair advantage, I just thought hardware macros were different from software cheats.",
+      "status": "open",
+      "created_at": "2026-04-02T09:19:21"
+    },
+    {
+      "ticket_id": "TKT-2025-00248",
+      "user_name": "MissedThePoint",
+      "user_id": "USR-59174",
+      "ticket_issue_category": "General Inquiry",
+      "ticket_title": "Why was I banned??",
+      "ticket_body": "can someone tell me why i got banned? the email doesnt say anything useful. i dont cheat. this is dumb. ive been playing for like a year and never had a problem. just unban me or at least tell me what i supposedly did. this is the worst customer support ive ever dealt with btw.",
+      "status": "open",
+      "created_at": "2026-04-02T11:00:51"
+    },
+    {
+      "ticket_id": "TKT-2025-00219",
+      "user_name": "AimbotAndy",
+      "user_id": "USR-19283",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Used aimbot in casual mode only",
+      "ticket_body": "Yeah I used an aimbot but only in casual/unranked modes. I never used it in competitive or ranked play. I thought casual mode was more relaxed about this kind of thing since it doesn't affect rankings. I know now that cheating is cheating regardless of the mode, but I think the punishment should reflect that I only used it casually and never impacted anyone's competitive standing. A permanent ban seems extreme for casual mode cheating.",
+      "status": "open",
+      "created_at": "2026-04-02T11:17:26"
+    },
+    {
+      "ticket_id": "TKT-2025-00250",
+      "user_name": "SpeedRunnerX",
+      "user_id": "USR-81645",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Speedrun techniques look like exploits but aren't",
+      "ticket_body": "I'm a speedrunner and I use advanced movement techniques like bunny hopping, slide canceling, and animation canceling that are all within the game's intended mechanics. These techniques can look suspicious to people who don't know about them and I get reported a lot. None of these are exploits - they are well-documented movement tech that the dev team has acknowledged as intended. Check the speedrunning community discord, my techniques are standard.",
+      "status": "open",
+      "created_at": "2026-04-02T12:10:14"
+    },
+    {
+      "ticket_id": "TKT-2025-00247",
+      "user_name": "LawyerUp",
+      "user_id": "USR-28461",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Legal action if ban not reversed",
+      "ticket_body": "I am giving you formal notice that if my account is not reinstated within 7 business days I will be consulting with my attorney regarding potential legal action. I have documented evidence that I did not violate your terms of service. Under consumer protection laws, you cannot revoke access to purchased digital goods without sufficient evidence. I have receipts for $2,300 in purchases on this account. This is my final attempt to resolve this through your support channel before escalating.",
+      "status": "open",
+      "created_at": "2026-04-02T13:46:15"
+    },
+    {
+      "ticket_id": "TKT-2025-00210",
+      "user_name": "PixelWarrior77",
+      "user_id": "USR-18745",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "My little brother used my account",
+      "ticket_body": "I'm really frustrated right now. My 13-year-old brother used my computer while I was at work and apparently downloaded some cheat software to use on my account. I had no idea until I got home and saw the ban notification. I've already grounded him and deleted everything he installed. This isn't fair because I personally never cheated. He admits he did it and I can have him write a statement if needed. Please don't punish me for his actions.",
+      "status": "open",
+      "created_at": "2026-04-02T13:51:13"
+    },
+    {
+      "ticket_id": "TKT-2025-00202",
+      "user_name": "FragMachine",
+      "user_id": "USR-55190",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Yes I used wallhacks but hear me out",
+      "ticket_body": "I want to be upfront - I did buy and use a wallhack for about 3 games. I was curious what it was like and I regret it immediately. I'm not trying to make excuses, I know what I did was wrong. I purchased this game and all the DLC and have invested over 2000 hours. I'm hoping my honesty counts for something. Is there any path to getting my account back?",
+      "status": "open",
+      "created_at": "2026-04-02T16:25:39"
+    },
+    {
+      "ticket_id": "TKT-2025-00208",
+      "user_name": "GamerzUnite",
+      "user_id": "USR-42887",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "Anti-cheat false detection - new GPU",
+      "ticket_body": "I just upgraded to a new RTX 5090 graphics card last week and installed the latest NVIDIA drivers. Ever since the new hardware installation, I've been getting weird behavior with the game and now I'm banned. I think your anti-cheat software is incompatible with the new driver version. I've seen other people on the forums reporting similar issues with the latest NVIDIA drivers. I've never cheated and I've been playing since Season 1. Can you check if there's a known issue with driver version 570.83?",
+      "status": "open",
+      "created_at": "2026-04-03T00:38:36"
+    },
+    {
+      "ticket_id": "TKT-2025-00243",
+      "user_name": "MiloTheGreat",
+      "user_id": "USR-68347",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "Accessibility software flagged as cheat",
+      "ticket_body": "I have a motor disability and I use accessibility software to remap controls and adjust input sensitivity so I can play with one hand using a specialized controller. The software I use is called Xim and a custom AutoHotkey script for key remapping. I believe this software was flagged as a cheat by your anti-cheat system. Banning disabled players for using accessibility tools is not a good look. I can provide documentation of my disability if needed.",
+      "status": "open",
+      "created_at": "2026-04-03T05:17:12"
+    },
+    {
+      "ticket_id": "TKT-2025-00238",
+      "user_name": "ParentGamer",
+      "user_id": "USR-49821",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "My kid downloaded something on my PC",
+      "ticket_body": "My 10-year-old son was watching YouTube videos about game hacks and apparently downloaded something to my computer while I was at work. I don't know exactly what he installed but I found some suspicious files in my downloads folder after I got the ban notification. I'm a 38-year-old parent, I don't even know what half these cheat programs are. I've since wiped the computer and set up parental controls. Can my account be reviewed?",
+      "status": "open",
+      "created_at": "2026-04-03T06:30:14"
+    },
+    {
+      "ticket_id": "TKT-2025-00226",
+      "user_name": "CoopMaster",
+      "user_id": "USR-14823",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "I only play co-op modes, why would I cheat?",
+      "ticket_body": "I exclusively play PvE and co-op modes. I have literally zero PvP matches on my account. Why would I cheat in a co-op mode where I'm playing WITH people, not against them? There's no competitive advantage to gain. I think your anti-cheat flagged something by mistake. Check my match history - it's 100% co-op. This doesn't make any sense.",
+      "status": "open",
+      "created_at": "2026-04-03T17:54:56"
+    },
+    {
+      "ticket_id": "TKT-2025-00244",
+      "user_name": "CopyPasteAppeal",
+      "user_id": "USR-90127",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Ban appeal - please review",
+      "ticket_body": "To whom it may concern, I am writing to formally appeal the suspension of my account. I believe this action was taken in error. I have always adhered to the terms of service and community guidelines. I respectfully request that my case be reviewed by a senior member of your support team. I am confident that upon review, you will find that no violation occurred. I await your prompt response to this matter. Sincerely, a loyal player.",
+      "status": "open",
+      "created_at": "2026-04-03T22:42:52"
+    },
+    {
+      "ticket_id": "TKT-2025-00220",
+      "user_name": "DataDriven",
+      "user_id": "USR-40571",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "Statistical evidence proves innocence",
+      "ticket_body": "I've done my own analysis of my gameplay statistics and I can prove mathematically that I'm not cheating. My accuracy is 23.4% which is exactly average for my rank. My headshot percentage is 18.7% which is actually below average. My K/D ratio has been steadily between 1.0 and 1.2 for the last year with no sudden spikes. I've compiled all of this into a spreadsheet with graphs showing my performance trends. Cheaters typically show sudden dramatic improvements - my stats show the opposite.",
+      "status": "open",
+      "created_at": "2026-04-03T23:40:58"
+    },
+    {
+      "ticket_id": "TKT-2025-00232",
+      "user_name": "eSportsHopeful",
+      "user_id": "USR-82104",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "Anti-cheat conflicting with streaming software",
+      "ticket_body": "I use a dual-PC streaming setup with an NDI capture card. I believe the NDI software or my Elgato capture card drivers are being flagged by your anti-cheat as suspicious software because they hook into the game process for capture. I also run ReShade for visual clarity on stream and I know some games flag that. I've been streaming this game for 8 months with zero issues until the last update. Did something change in the anti-cheat in the latest patch?",
+      "status": "open",
+      "created_at": "2026-04-04T00:12:28"
+    },
+    {
+      "ticket_id": "TKT-2025-00207",
+      "user_name": "NightOwlGaming",
+      "user_id": "USR-39402",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "False positive - I stream all my gameplay",
+      "ticket_body": "This ban is absolutely a false positive. I stream every single one of my gaming sessions on Twitch at twitch.tv/nightowlgaming. You can go back and watch any of my VODs from the past month and you will see there is zero evidence of cheating. I have over 200 hours of recorded gameplay that proves I play legitimately. My stream has 500+ regular viewers who can vouch for me. I also run OBS and Discord overlay which might be triggering your anti-cheat. Please check my VODs before making a final decision.",
+      "status": "open",
+      "created_at": "2026-04-04T01:00:53"
+    },
+    {
+      "ticket_id": "TKT-2025-00221",
+      "user_name": "SilentStrike",
+      "user_id": "USR-10234",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Unban request",
+      "ticket_body": "Hello, I was recently banned and I don't know why. I have never cheated in this game. I play on Xbox with a controller and I don't even know how someone would cheat on console. Please unban my account so I can play again. Thank you.",
+      "status": "open",
+      "created_at": "2026-04-04T03:46:02"
+    },
+    {
+      "ticket_id": "TKT-2025-00206",
+      "user_name": "TacticalOps",
+      "user_id": "USR-78301",
+      "ticket_issue_category": "Report Account Compromise",
+      "ticket_title": "Account compromised during data breach",
+      "ticket_body": "I believe my account was compromised. I received an email notification about a login from a device I don't recognize about 3 weeks ago but thought it was spam. Now I see my account is banned. I changed my password but it was too late. I've been playing since the beta and have never had any issues before. I use the same username on other platforms where I have a clean record. Is there any way to verify the cheating activity came from a different device than my usual one?",
+      "status": "open",
+      "created_at": "2026-04-04T07:19:47"
+    },
+    {
+      "ticket_id": "TKT-2025-00205",
+      "user_name": "CasualPlayer2020",
+      "user_id": "USR-61234",
+      "ticket_issue_category": "Report Account Compromise",
+      "ticket_title": "Account was hacked - someone else cheated",
+      "ticket_body": "I was on vacation in Europe for 2 weeks and when I came back I found my account was banned. I checked my login history and there are logins from IP addresses in Russia and China that are definitely not me. Someone clearly gained access to my account and used it for cheating. I have 2FA enabled now but I didn't before. I have screenshots of the suspicious login activity from my email notifications. Can you please review the IP logs? My normal IP is from Texas.",
+      "status": "open",
+      "created_at": "2026-04-04T16:06:29"
+    },
+    {
+      "ticket_id": "TKT-2025-00242",
+      "user_name": "Disconnected",
+      "user_id": "USR-72016",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Banned and I barely even play anymore",
+      "ticket_body": "I haven't played this game seriously in months. I log in maybe once every two weeks to play a couple matches with friends. I just tried to log in today and apparently I've been banned since last month and didn't even know. I have no idea what triggered this. I don't have any third-party software installed and I play on a Mac which limits what I can even run. Something is definitely wrong here.",
+      "status": "open",
+      "created_at": "2026-04-04T16:56:09"
+    },
+    {
+      "ticket_id": "TKT-2025-00235",
+      "user_name": "ClanLeader_X",
+      "user_id": "USR-63748",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Clan leader wrongfully banned - 50 members affected",
+      "ticket_body": "I am the leader of a 50-person clan and my ban is affecting our entire community. We have a tournament next month and without my account we can't manage the roster or coordinate matches. I have never cheated - I have a reputation to uphold and cheating would destroy my standing in the community. Multiple clan members and other clan leaders can vouch for my integrity. This is bigger than just my account.",
+      "status": "open",
+      "created_at": "2026-04-04T17:01:44"
+    },
+    {
+      "ticket_id": "TKT-2025-00246",
+      "user_name": "NotACheater",
+      "user_id": "USR-43290",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "I swear I didn't cheat please read this",
+      "ticket_body": "PLEASE READ THIS CAREFULLY. I DID NOT CHEAT. I know everyone says that but I am telling the truth. I work 60 hours a week and gaming is my only hobby. Why would I risk my account with $600 worth of skins by cheating? It makes no sense. I don't have time to set up cheats even if I wanted to. I just hop on for a few games after work. You are punishing an innocent person and I need this reversed ASAP.",
+      "status": "open",
+      "created_at": "2026-04-05T10:02:24"
+    },
+    {
+      "ticket_id": "TKT-2025-00241",
+      "user_name": "ApexPredator",
+      "user_id": "USR-55029",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Smurf account banned, main is clean",
+      "ticket_body": "My alt account got banned but my main account with the same hardware ID is in perfect standing. If I were actually cheating, wouldn't both accounts be banned? The fact that my main is clean after 3,000 hours proves I don't cheat. I made the alt to play with lower-ranked friends and I was just stomping lobbies because of the skill gap, which probably triggered a bunch of reports. Reports aren't evidence of cheating.",
+      "status": "open",
+      "created_at": "2026-04-05T11:06:18"
+    },
+    {
+      "ticket_id": "TKT-2025-00249",
+      "user_name": "WrongfullyBanned",
+      "user_id": "USR-37820",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "Genuinely wrongful ban - software developer",
+      "ticket_body": "I'm a software developer and I had Visual Studio, Docker, and several debugging tools running in the background while playing. I suspect your kernel-level anti-cheat flagged one of my development tools as suspicious. I can provide a full list of running processes from the time of the ban. I've seen reports of other developers being flagged for having IDEs or debuggers active. I was not reverse engineering your game or running any game modifications. My development work is completely unrelated to gaming.",
+      "status": "open",
+      "created_at": "2026-04-05T22:39:42"
+    },
+    {
+      "ticket_id": "TKT-2025-00231",
+      "user_name": "FairPlayFrank",
+      "user_id": "USR-45672",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Shared PC with roommate who cheated",
+      "ticket_body": "I share an apartment and a gaming PC with my roommate. We both play this game on separate accounts. He got caught cheating on his account and now my account is banned too even though I never cheated. I assume it's because we share the same hardware ID and IP address. This is guilt by association and it's not fair. His account getting banned is his problem, but mine should be reviewed separately. We are two different people.",
+      "status": "open",
+      "created_at": "2026-04-06T10:11:38"
+    },
+    {
+      "ticket_id": "TKT-2025-00216",
+      "user_name": "ReformedGamer",
+      "user_id": "USR-73456",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "I cheated, I'm sorry, please give me a second chance",
+      "ticket_body": "I want to start by saying I take full responsibility. I used a cheat program for about two weeks. I was going through a rough patch in my life and gaming was my escape, but I was losing constantly and it was making things worse. Cheating seemed like a quick fix but it just made me feel worse. I've since gotten help for my issues and I genuinely want to come back and play the right way. I've deleted all cheat software, run a full system wipe, and I'm willing to accept any monitoring you want to put on my account.",
+      "status": "open",
+      "created_at": "2026-04-06T10:53:37"
+    },
+    {
+      "ticket_id": "TKT-2025-00240",
+      "user_name": "BudgetGamer",
+      "user_id": "USR-31054",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Low-end PC causing lag that looks like teleporting",
+      "ticket_body": "I play on an old laptop that barely runs the game at 30fps. When the game hitches or my wifi drops packets, my character teleports and stutters on other people's screens. I've been told by other players that it looks like I'm speed hacking or teleporting but it's just my terrible hardware and internet. I live in a rural area with satellite internet that has high ping spikes. I'm not cheating, I'm just poor. Please check my hardware specs and connection logs.",
+      "status": "open",
+      "created_at": "2026-04-06T11:05:43"
+    },
+    {
+      "ticket_id": "TKT-2025-00233",
+      "user_name": "RageQuit99",
+      "user_id": "USR-57381",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "This is unfair and I want a refund",
+      "ticket_body": "I have been wrongfully banned and I want either my account unbanned or a full refund of every purchase I've ever made on this account. I have receipts for over $1,200 in purchases. If you are going to ban paying customers without solid evidence then you owe them their money back. I have contacted my credit card company and I am prepared to file a chargeback for every transaction if this isn't resolved. I also plan to leave negative reviews everywhere.",
+      "status": "open",
+      "created_at": "2026-04-06T18:50:29"
+    },
+    {
+      "ticket_id": "TKT-2025-00222",
+      "user_name": "VelocityKing",
+      "user_id": "USR-52918",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Wrongfully banned - I'm just good at the game",
+      "ticket_body": "I've been playing FPS games competitively for over 10 years. I have insane aim because I practice in aim trainers for 2 hours every day. My headshot percentage is high because I've put in thousands of hours of practice. Just because someone is better than average doesn't mean they're cheating. I guarantee if you spectated my gameplay you would see that my movement and game sense match my aim. Please actually review my case instead of relying on some automated system.",
+      "status": "open",
+      "created_at": "2026-04-07T11:11:43"
+    },
+    {
+      "ticket_id": "TKT-2025-00230",
+      "user_name": "QuickScope_Mike",
+      "user_id": "USR-38291",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Banned right after a great game",
+      "ticket_body": "I had the best game of my life last night - went 42-3 in a match. I know that looks suspicious but I was honestly just in the zone. Everything was clicking. I've been playing shooters since Halo 2 and sometimes you just have one of those games where you can't miss. I got reported by half the lobby and now I'm banned. My average K/D is 1.4, I just had one incredible game. Punishing players for having a good match is ridiculous.",
+      "status": "open",
+      "created_at": "2026-04-07T22:43:32"
+    },
+    {
+      "ticket_id": "TKT-2025-00213",
+      "user_name": "CompetitiveEdge",
+      "user_id": "USR-91024",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "Tournament player - need urgent review",
+      "ticket_body": "I am a registered competitive player in the ESL league and I have a tournament match scheduled next week. This ban is preventing me from practicing and competing. I have never cheated - my tournament match history is public and all my games are played on monitored tournament servers with anti-cheat oversight. My team and coach can verify my legitimacy. I also have my ESL player profile with verified matches showing consistent performance. My ESL ID is ESL-44021.",
+      "status": "open",
+      "created_at": "2026-04-07T22:50:58"
+    },
+    {
+      "ticket_id": "TKT-2025-00225",
+      "user_name": "PhoenixRising",
+      "user_id": "USR-60471",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Wrongful ban - demanding explanation",
+      "ticket_body": "I demand a detailed explanation for why my account was banned. Your email just says 'violation of terms of service' which is incredibly vague. What specifically did I do? What evidence do you have? I have a right to know the exact reason and the exact evidence used against me. I have never installed any third-party software related to this game. If you can't provide specific evidence then you need to unban me immediately.",
+      "status": "open",
+      "created_at": "2026-04-08T03:28:28"
+    },
+    {
+      "ticket_id": "TKT-2025-00234",
+      "user_name": "ZenGamer",
+      "user_id": "USR-20198",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Please review my account - no cheats used",
+      "ticket_body": "Hi there, I'm writing to request a review of my recent ban. I don't use any cheating software and I'm honestly confused about what triggered it. I play casually, maybe 5-6 hours a week, and I'm not even very good. My win rate is around 45%. I'm happy to cooperate with any investigation - you can scan my system remotely or whatever you need. I just want to get back to playing with my friends.",
+      "status": "open",
+      "created_at": "2026-04-08T11:38:09"
+    },
+    {
+      "ticket_id": "TKT-2025-00215",
+      "user_name": "GlitchFinder",
+      "user_id": "USR-48291",
+      "ticket_issue_category": "Report Bug",
+      "ticket_title": "Banned for using map exploit",
+      "ticket_body": "I found a spot on the Dustbowl map where you can clip through a wall and shoot players from inside the geometry. I used it a bunch of times because I thought it was a known issue and that everyone was doing it. I see now from the ban notice that exploiting map glitches is against the rules. I want to point out that this is a bug in YOUR map, not something I downloaded or installed. I think a permanent ban is too harsh for exploiting a bug that the dev team left in the game.",
+      "status": "open",
+      "created_at": "2026-04-08T11:59:36"
+    },
+    {
+      "ticket_id": "TKT-2025-00223",
+      "user_name": "MidnightRogue",
+      "user_id": "USR-87210",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Please unban - this is my only game",
+      "ticket_body": "I am begging you to please unban my account. This is the only game I play and it means everything to me. I have a disability that keeps me home most of the time and this game is how I socialize and stay connected with friends. I have never cheated and I would never risk losing my account. I have spent over $800 on skins and battle passes. Please, this game is all I have.",
+      "status": "open",
+      "created_at": "2026-04-08T15:21:02"
+    },
+    {
+      "ticket_id": "TKT-2025-00201",
+      "user_name": "xXProGamerXx",
+      "user_id": "USR-44821",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "I admit I used aimbot - please unban",
+      "ticket_body": "Look, I'm going to be honest with you. I downloaded an aimbot from a website my friend sent me. I used it for about a week because I was frustrated with getting destroyed in ranked. I know it was wrong and I've already uninstalled everything. I've been playing this game for 3 years and this is the first time I ever cheated. Can you please give me another chance? I'm willing to accept a temporary ban instead of permanent.",
+      "status": "open",
+      "created_at": "2026-04-09T02:14:47"
+    },
+    {
+      "ticket_id": "TKT-2025-00228",
+      "user_name": "OldSchoolFrag",
+      "user_id": "USR-25847",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Day one player banned after 5 years",
+      "ticket_body": "I have been playing this game since the day it launched. Five years. Over 4,000 hours. Not a single warning, not a single previous ban, not a single report that I know of. And now suddenly I'm a cheater? That makes zero sense. If I were cheating, wouldn't I have been caught sometime in the previous 4,999 hours? Something is wrong with your detection system. My account is older than most of your current player base.",
+      "status": "open",
+      "created_at": "2026-04-09T05:17:33"
+    },
+    {
+      "ticket_id": "TKT-2025-00211",
+      "user_name": "ProSniper420",
+      "user_id": "USR-67890",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Friend used my PC while I was away",
+      "ticket_body": "My friend came over to my house last weekend for a LAN party and he used my PC to play a few rounds while I was making food. I didn't know he had a USB drive with cheat software on it. He loaded up some aimbot and played a few games on MY account without my knowledge or consent. I only found out when I tried to log in the next day and saw the ban. This is completely unfair. He has his own account which is also banned. Can you check the timestamps?",
+      "status": "open",
+      "created_at": "2026-04-09T13:06:10"
+    },
+    {
+      "ticket_id": "TKT-2025-00239",
+      "user_name": "TrueAim",
+      "user_id": "USR-84562",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "High sens mouse + aim trainer = not cheating",
+      "ticket_body": "I play on 1600 DPI with a high in-game sensitivity. I also use Kovaak's aim trainer for 1-2 hours before every session to warm up. My flick shots look insane on killcams and I get reported constantly, but it's just good aim. I have over 500 hours in Kovaak's alone. My Kovaak's scores are in the top 5% globally and I can provide my profile as proof. Having good aim is not cheating. Your system needs to tell the difference between skill and hacks.",
+      "status": "open",
+      "created_at": "2026-04-09T19:20:52"
+    },
+    {
+      "ticket_id": "TKT-2025-00229",
+      "user_name": "GhostProtocol",
+      "user_id": "USR-94103",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Internet cafe PC had cheats installed",
+      "ticket_body": "I was traveling in South Korea for work and played a few games at a PC bang (internet cafe) near my hotel. I logged into my account on their PC and played for about 2 hours. I had no idea those PCs had cheat software pre-installed - apparently that's common at some of the cheaper cafes. I never intentionally installed or ran any cheats. Can you check the login location and see that it was from a public PC cafe in Seoul? My normal logins are all from Portland, Oregon.",
+      "status": "open",
+      "created_at": "2026-04-09T20:16:32"
+    },
+    {
+      "ticket_id": "TKT-2025-00227",
+      "user_name": "NovaBurst",
+      "user_id": "USR-71560",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "Linux user - anti-cheat compatibility issue",
+      "ticket_body": "I play on Linux using Proton/Wine compatibility layer. I've seen multiple reports of your anti-cheat incorrectly flagging Linux users because the compatibility layer looks suspicious to kernel-level anti-cheat software. I am running Arch Linux with the latest Proton version. This is a known issue in the Linux gaming community and other games have already fixed their false positive detection for Proton users. Please look into this.",
+      "status": "open",
+      "created_at": "2026-04-10T00:33:20"
+    },
+    {
+      "ticket_id": "TKT-2025-00209",
+      "user_name": "StealthMaster",
+      "user_id": "USR-50123",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "VPN triggered false ban",
+      "ticket_body": "I use a VPN for privacy and work purposes. I think the VPN IP address rotation triggered your anti-cheat system. I've been banned before on another game for the same reason and it was reversed after review. My gameplay stats are completely normal - you can check my K/D ratio and accuracy percentages. I'm not using any cheating software, just NordVPN for work. Please investigate.",
+      "status": "open",
+      "created_at": "2026-04-10T06:30:46"
+    },
+    {
+      "ticket_id": "TKT-2025-00212",
+      "user_name": "StreamerPro",
+      "user_id": "USR-22334",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "I have video proof of my innocence",
+      "ticket_body": "I have extensive evidence that I was not cheating. I record all my gameplay using ShadowPlay and I have the full recordings from the sessions that supposedly triggered the ban. I can provide: 1) Full unedited gameplay recordings, 2) My ShadowPlay settings showing no tampering, 3) A clean scan of my system using multiple anti-malware tools, 4) My consistent performance stats over the past 6 months showing no sudden improvement. My gameplay stats show a gradual improvement curve consistent with legitimate practice.",
+      "status": "open",
+      "created_at": "2026-04-10T07:44:06"
+    },
+    {
+      "ticket_id": "TKT-2025-00204",
+      "user_name": "User83742",
+      "user_id": "USR-83742",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Request for account review",
+      "ticket_body": "I am writing to appeal my ban. I did not cheat and this is a mistake. Please unban my account. I have always followed the rules and played fairly. I do not understand why I was banned. Please review my account and you will see that I am innocent. I look forward to hearing from you.",
+      "status": "open",
+      "created_at": "2026-04-10T07:59:32"
+    },
+    {
+      "ticket_id": "TKT-2025-00237",
+      "user_name": "DigitalNomad",
+      "user_id": "USR-76540",
+      "ticket_issue_category": "Report False Ban",
+      "ticket_title": "Travel triggered suspicious activity detection",
+      "ticket_body": "I travel full time for work and play from hotel wifi in different cities every week. Last month alone I played from Chicago, Denver, San Francisco, and Seattle. I think the rapid location changes triggered your system as suspicious. I'm not spoofing my location or using any exploits - I literally move cities for work. My employer can verify my travel schedule if needed. This has been my lifestyle for 2 years and it's never been an issue until now.",
+      "status": "open",
+      "created_at": "2026-04-10T13:01:07"
+    },
+    {
+      "ticket_id": "TKT-2025-00245",
+      "user_name": "TemplateUser1",
+      "user_id": "USR-15738",
+      "ticket_issue_category": "Request Account Unban",
+      "ticket_title": "Wrongful ban appeal",
+      "ticket_body": "Dear Support Team, I am contacting you regarding the recent suspension of my account. I wish to inform you that I have not engaged in any activities that violate your terms of service. I kindly request a thorough review of my account activity. I am a dedicated member of your gaming community and this ban has been very distressing. I hope you will reconsider this decision. Thank you for your attention to this matter.",
+      "status": "open",
+      "created_at": "2026-04-10T14:23:01"
+    }
+  ]
+}
