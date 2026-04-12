@@ -1,4 +1,11 @@
--- schema.sql — CREATE TABLE statements for Ticket Tech Titan
+-- schema.sql — DROP and CREATE TABLE statements for Ticket Tech Titan
+
+-- Drop existing tables in reverse FK dependency order for clean resets
+DROP TABLE IF EXISTS ticket_status_history CASCADE;
+DROP TABLE IF EXISTS support_tickets_with_ai CASCADE;
+DROP TABLE IF EXISTS support_tickets CASCADE;
+DROP TABLE IF EXISTS ban_database CASCADE;
+DROP TABLE IF EXISTS ticket_categories CASCADE;
 
 -- 1. Lookup table for ticket dropdown categories
 CREATE TABLE IF NOT EXISTS ticket_categories (
