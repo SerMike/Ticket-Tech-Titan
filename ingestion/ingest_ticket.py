@@ -1,4 +1,14 @@
-"""ingest_ticket.py — CLI tool for ingesting tickets and ban records into PostgreSQL."""
+"""ingest_ticket.py — CLI tool for ingesting tickets and ban records into PostgreSQL.
+
+Usage:
+    python ingestion/ingest_ticket.py --tickets data/sample_tickets.json
+    python ingestion/ingest_ticket.py --bans data/sample_bans.json
+    python ingestion/ingest_ticket.py --tickets data/sample_tickets.json --bans data/sample_bans.json
+"""
+
+# ---------------------------------------------------------------------------
+# Imports & Configuration
+# ---------------------------------------------------------------------------
 
 import argparse
 import json
@@ -9,16 +19,23 @@ from pathlib import Path
 import psycopg2
 from dotenv import load_dotenv
 
+# Load environment variables from the project root .env file
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
+# Every ticket must have these 8 fields to pass validation
 REQUIRED_TICKET_FIELDS = [
     "ticket_id", "user_name", "user_id", "ticket_issue_category",
     "ticket_title", "ticket_body", "status", "created_at",
 ]
 
 
+# ---------------------------------------------------------------------------
+# Database Connection
+# ---------------------------------------------------------------------------
+
 def get_connection():
-    """Connect to PostgreSQL using DATABASE_URL from .env."""
+    """Connect to PostgreSQL using DATABASE_URL from .env.
+    Returns a (connection, cursor) tuple. Exits if the connection fails."""
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         print("ERROR: DATABASE_URL is not set. Add it to your .env file.")
@@ -34,8 +51,12 @@ def get_connection():
         sys.exit(1)
 
 
+# ---------------------------------------------------------------------------
+# JSON File Loading
+# ---------------------------------------------------------------------------
+
 def load_json_file(filepath):
-    """Read and parse a JSON file. Exit on error."""
+    """Read and parse a JSON file. Exits if the file is missing or malformed."""
     path = Path(filepath)
     if not path.exists():
         print(f"ERROR: File not found: {path}")
@@ -48,19 +69,34 @@ def load_json_file(filepath):
         sys.exit(1)
 
 
+# ---------------------------------------------------------------------------
+# Ticket Ingestion — Validation, Single Insert, and Bulk Processing
+# ---------------------------------------------------------------------------
+
 def validate_ticket(ticket):
-    """Return a list of missing required fields (empty list = valid)."""
+    """Check that all 8 required fields are present in a ticket dict.
+    Returns a list of missing field names (empty list means valid)."""
     return [f for f in REQUIRED_TICKET_FIELDS if f not in ticket]
 
 
 def ingest_single_ticket(cur, ticket):
-    """Validate and insert one ticket. Returns 'inserted', 'skipped', or 'failed'."""
+    """Validate and insert one ticket into support_tickets.
+
+    Steps:
+      1. Validate required fields — fail early if any are missing
+      2. INSERT with ON CONFLICT DO NOTHING — skip duplicates gracefully
+      3. If inserted, also create an initial ticket_status_history entry
+
+    Returns: 'inserted', 'skipped', or 'failed'
+    """
+    # Step 1: Validate required fields
     missing = validate_ticket(ticket)
     if missing:
         ticket_id = ticket.get("ticket_id", "UNKNOWN")
         print(f"  INVALID {ticket_id}: missing fields: {', '.join(missing)}")
         return "failed"
 
+    # Step 2: Attempt insert (duplicates are silently skipped via ON CONFLICT)
     ticket_id = ticket["ticket_id"]
     try:
         cur.execute(
@@ -77,7 +113,7 @@ def ingest_single_ticket(cur, ticket):
             print(f"  SKIPPED {ticket_id}: already exists.")
             return "skipped"
 
-        # Create initial status history entry
+        # Step 3: Record the initial status in ticket_status_history
         cur.execute(
             """INSERT INTO ticket_status_history (ticket_id, old_status, new_status)
                VALUES (%s, NULL, %s)""",
@@ -92,7 +128,8 @@ def ingest_single_ticket(cur, ticket):
 
 
 def ingest_tickets(cur, tickets):
-    """Process a list of tickets and print a summary."""
+    """Process a list of tickets by calling ingest_single_ticket for each one.
+    Tracks inserted/skipped/failed counts and prints a summary at the end."""
     counts = {"inserted": 0, "skipped": 0, "failed": 0}
     for ticket in tickets:
         result = ingest_single_ticket(cur, ticket)
@@ -105,8 +142,14 @@ def ingest_tickets(cur, tickets):
     return counts
 
 
+# ---------------------------------------------------------------------------
+# Ban Record Ingestion
+# ---------------------------------------------------------------------------
+
 def ingest_bans(cur, bans):
-    """Insert ban records into ban_database with duplicate handling."""
+    """Insert ban records into ban_database.
+    Skips duplicates via ON CONFLICT on user_id (each user has one ban record).
+    Tracks inserted/skipped/failed counts and prints a summary at the end."""
     inserted = 0
     skipped = 0
     failed = 0
@@ -138,7 +181,12 @@ def ingest_bans(cur, bans):
     return {"inserted": inserted, "skipped": skipped, "failed": failed}
 
 
+# ---------------------------------------------------------------------------
+# CLI Entry Point — parse args, detect format, and route to the right handler
+# ---------------------------------------------------------------------------
+
 def main():
+    # Set up command-line arguments: --tickets and --bans (at least one required)
     parser = argparse.ArgumentParser(
         description="Ingest tickets and/or ban records into the database."
     )
@@ -157,10 +205,12 @@ def main():
 
     conn, cur = get_connection()
 
+    # -- Ticket ingestion --
+    # Supports two JSON formats:
+    #   - Single ticket:  {"ticket_id": "...", "user_name": "...", ...}
+    #   - Bulk array:     {"tickets": [{...}, {...}, ...]}
     if args.tickets:
         data = load_json_file(args.tickets)
-
-        # Detect single ticket vs bulk array
         if "tickets" in data:
             tickets = data["tickets"]
             print(f"Loading {len(tickets)} tickets from {args.tickets}...")
@@ -174,6 +224,8 @@ def main():
 
         ingest_tickets(cur, tickets)
 
+    # -- Ban record ingestion --
+    # Expects JSON format: {"bans": [{...}, {...}, ...]}
     if args.bans:
         data = load_json_file(args.bans)
 
@@ -187,6 +239,7 @@ def main():
 
         ingest_bans(cur, bans)
 
+    # -- Clean up --
     cur.close()
     conn.close()
     print("\nDone.")
