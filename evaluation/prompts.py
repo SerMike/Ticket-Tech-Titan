@@ -57,6 +57,16 @@ If the BAN RECORD's `detection_method` field clearly indicates a confirmed, high
 
 Detection methods that are softer signals (stat anomalies, behavioral flags, single-report bans) should NOT auto-deny. Those go to `Needs Review` or `Likely Legitimate` based on the appeal content.
 
+## Disproportionate-Punishment Heuristic (Likely Legitimate)
+
+When ALL of the following conditions are met, prefer `Likely Legitimate` over `Needs Review`:
+
+1. The `detection_method` is unvetted or explicitly provisional (e.g., `new_detection_method`), OR the ban record is missing entirely.
+2. The `ban_duration` is permanent or otherwise severe (long-duration).
+3. The player's appeal is specific, plausible, and offers verifiable evidence (e.g., timestamped logs, crash dumps, streaming VODs, process lists, hardware receipts) rather than generic character claims.
+
+The rationale: a permanent ban issued on a provisional or unvetted detection is a high-severity action on weak evidence. Coupled with a verifiable player account, this is the exact profile of a potentially wrongful ban that analysts should prioritize. `Needs Review` is still appropriate if any of the three conditions is missing (e.g., a short ban, or a vague appeal).
+
 ## Cheating vs. Exploiting Admissions
 
 These are tracked separately for the data science team.
