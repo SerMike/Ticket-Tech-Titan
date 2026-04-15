@@ -134,12 +134,12 @@ def evaluate_ticket(ticket: dict, ban_record: dict | None) -> dict:
             toward Likely Legitimate or Needs Review).
 
     Returns:
-        A dict with exactly these six keys, matching the LLM-output fields
-        of the support_tickets_with_ai schema:
+        A dict matching the support_tickets_with_ai schema, ready to be
+        passed directly to writer.save_evaluation(). Contains:
+            ticket_id (str) — copied from the source ticket (FK)
+            user_id (str) — copied from the source ticket (FK)
             ai_summary (str), ai_category (str), admitted_cheating (bool),
             admitted_exploit (bool), confidence_score (float), ai_reasoning (str)
-        The caller (writer.py) is responsible for attaching ticket_id/user_id
-        before inserting into the database.
 
     Raises:
         EvaluationError: model returned malformed JSON or failed schema
@@ -180,6 +180,8 @@ def evaluate_ticket(ticket: dict, ban_record: dict | None) -> dict:
     # Step 5: Return a clean dict with only the schema fields.
     # Normalize confidence_score to float in case the model returned an int.
     return {
+        "ticket_id": ticket["ticket_id"],
+        "user_id": ticket["user_id"],
         "ai_summary": parsed["ai_summary"],
         "ai_category": parsed["ai_category"],
         "admitted_cheating": parsed["admitted_cheating"],
