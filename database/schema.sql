@@ -37,12 +37,20 @@ CREATE TABLE IF NOT EXISTS ban_database (
 );
 
 -- 4. LLM-generated evaluations of tickets
+--
+-- Notes on constraints:
+--   * ticket_id is UNIQUE so the evaluation pipeline can UPSERT on
+--     re-evaluation (one current evaluation per ticket).
+--   * user_id has NO foreign key to ban_database. The rare ~1% case of
+--     "ticket exists but no matching ban record" (potentially wrongful
+--     ban) still needs an evaluation row, and a FK would block that.
+--     Referential integrity for the ticket side is already covered by
+--     the ticket_id FK to support_tickets.
 CREATE TABLE IF NOT EXISTS support_tickets_with_ai (
     id SERIAL PRIMARY KEY,
-    ticket_id VARCHAR(50) NOT NULL
+    ticket_id VARCHAR(50) NOT NULL UNIQUE
         REFERENCES support_tickets(ticket_id),
-    user_id VARCHAR(255) NOT NULL
-        REFERENCES ban_database(user_id),
+    user_id VARCHAR(255) NOT NULL,
     ai_summary TEXT,
     ai_category VARCHAR(255),
     admitted_cheating BOOLEAN,

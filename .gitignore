@@ -27,6 +27,9 @@ build/
 # Claude Code
 .claude/worktrees/
 
+# Planning docs (already-tracked files stay tracked; new files are ignored)
+planning/
+
 # OS
 .DS_Store
 Thumbs.db
