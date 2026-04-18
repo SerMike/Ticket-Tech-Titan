@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS support_tickets (
         REFERENCES ticket_categories(category_name),
     ticket_title VARCHAR(500) NOT NULL,
     ticket_body TEXT NOT NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'open',
+    status VARCHAR(50) NOT NULL DEFAULT 'open'
+        CHECK (status IN ('open', 'pending', 'closed')),
     created_at TIMESTAMP NOT NULL
 );
 
