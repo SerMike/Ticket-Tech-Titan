@@ -35,6 +35,7 @@ __all__ = [
     "get_ai_evaluation",
     "update_ticket_status",
     "get_analytics_data",
+    "get_summary_stats",
 ]
 
 
@@ -180,6 +181,60 @@ def update_ticket_status(ticket_id: str, new_status: str) -> str:
                     (ticket_id, old_status, new_status),
                 )
         return old_status
+    finally:
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Landing-page summary
+# ---------------------------------------------------------------------------
+
+def get_summary_stats() -> dict[str, int]:
+    """Return the three top-of-dashboard counts.
+
+    ``open_count``: tickets currently in the queue (status = 'open').
+    ``auto_denied_today``: evaluations processed today that the AI (or
+        the auto-deny override) categorized as 'Auto-Deny'. Uses
+        processed_at in the server's timezone, matching how analysts
+        think about "today's work".
+    ``needs_review``: open tickets the AI explicitly flagged as
+        'Needs Review' — the bucket the AI can't decide on and
+        actively wants a human to look at.
+    """
+    conn = get_connection(autocommit=True)
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT COUNT(*) FROM support_tickets WHERE status = 'open'"
+            )
+            open_count = cur.fetchone()[0]
+
+            cur.execute(
+                """
+                SELECT COUNT(*)
+                FROM support_tickets_with_ai
+                WHERE ai_category = 'Auto-Deny'
+                  AND DATE(processed_at) = CURRENT_DATE
+                """
+            )
+            auto_denied_today = cur.fetchone()[0]
+
+            cur.execute(
+                """
+                SELECT COUNT(*)
+                FROM support_tickets st
+                JOIN support_tickets_with_ai ai ON ai.ticket_id = st.ticket_id
+                WHERE st.status = 'open'
+                  AND ai.ai_category = 'Needs Review'
+                """
+            )
+            needs_review = cur.fetchone()[0]
+
+        return {
+            "open_count": open_count,
+            "auto_denied_today": auto_denied_today,
+            "needs_review": needs_review,
+        }
     finally:
         conn.close()
 
