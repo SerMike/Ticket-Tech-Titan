@@ -176,8 +176,125 @@ else:
 
 
 # ---------------------------------------------------------------------------
-# Ticket detail selector (body built in Step 5)
+# Ticket detail view
 # ---------------------------------------------------------------------------
+
+# Streamlit color shortcodes used when rendering the AI category badge.
+# Keys must match evaluation.evaluator.VALID_CATEGORIES.
+_CATEGORY_BADGE_COLOR = {
+    "Auto-Deny": "red",
+    "Likely Legitimate": "green",
+    "Needs Review": "orange",
+    "Admitted to Cheating": "violet",
+    "Templated/Bot Appeal": "gray",
+}
+
+
+def _admission_indicator(value) -> str:
+    """Render a boolean admission flag as an analyst-friendly glyph."""
+    if value is True:
+        return "✅ Yes"
+    if value is False:
+        return "❌ No"
+    return "— Not evaluated"
+
+
+def _render_detail(detail: dict) -> None:
+    """Render the full ticket detail inside the caller's container.
+
+    Layout (matches Step 5 of planning/phase-3-checklist.md):
+      - Left column: raw appeal + status selectbox
+      - Right column: ban record (or wrongful-ban warning)
+      - Bottom: AI evaluation block with summary and expandable reasoning
+    """
+    ticket_id = detail["ticket_id"]
+    left, right = st.columns(2)
+
+    # -- Left: raw appeal ---------------------------------------------------
+    with left:
+        st.subheader("Appeal")
+        st.markdown(
+            f"**Player:** {detail['user_name']}  \n"
+            f"**User ID:** `{detail['user_id']}`  \n"
+            f"**Ticket ID:** `{ticket_id}`  \n"
+            f"**Submitted:** {detail['created_at'].strftime('%Y-%m-%d %H:%M')}"
+        )
+        st.caption(f"User-submitted category: **{detail['ticket_issue_category']}**")
+        st.markdown(f"#### {detail['ticket_title']}")
+        st.write(detail["ticket_body"])
+
+        st.divider()
+        st.markdown("**Status**")
+        current_status = detail["status"]
+        new_status = st.selectbox(
+            "Status",
+            options=list(db.ALLOWED_STATUSES),
+            index=list(db.ALLOWED_STATUSES).index(current_status),
+            key=f"status_{ticket_id}",
+            label_visibility="collapsed",
+        )
+        if new_status != current_status:
+            try:
+                db.update_ticket_status(ticket_id, new_status)
+                st.toast(
+                    f"Ticket {ticket_id}: {current_status} → {new_status}",
+                    icon="✅",
+                )
+                st.rerun()
+            except ValueError as e:
+                st.error(str(e))
+
+    # -- Right: ban record --------------------------------------------------
+    with right:
+        st.subheader("Ban record")
+        if detail["ban_reason"] is None:
+            st.warning("⚠️ No ban record — potential wrongful ban")
+        else:
+            st.markdown(
+                f"**Reason:** {detail['ban_reason']}  \n"
+                f"**Detection:** {detail['detection_method']}  \n"
+                f"**Duration:** {detail['ban_duration']}  \n"
+                f"**Ban date:** {detail['ban_date']}"
+            )
+
+    # -- Bottom: AI evaluation ---------------------------------------------
+    st.divider()
+    st.subheader("AI evaluation")
+
+    if detail["ai_category"] is None:
+        st.info("Not yet evaluated. Run the evaluation pipeline to populate.")
+        return
+
+    category = detail["ai_category"]
+    badge_color = _CATEGORY_BADGE_COLOR.get(category, "blue")
+    confidence = float(detail["confidence_score"]) if detail["confidence_score"] is not None else 0.0
+
+    cat_col, conf_col, adm_col = st.columns([2, 2, 3])
+    with cat_col:
+        st.markdown("**Category**")
+        st.markdown(f":{badge_color}[**{category}**]")
+    with conf_col:
+        st.markdown("**Confidence**")
+        st.progress(confidence, text=f"{confidence:.0%}")
+    with adm_col:
+        st.markdown(
+            f"**Admitted cheating:** {_admission_indicator(detail['admitted_cheating'])}  \n"
+            f"**Admitted exploit:** {_admission_indicator(detail['admitted_exploit'])}"
+        )
+
+    evaluation = db.get_ai_evaluation(ticket_id)
+    if evaluation is None:
+        # Shouldn't happen — ai_category is non-null but the eval row vanished.
+        st.warning("AI evaluation row could not be loaded.")
+        return
+
+    st.markdown("**Summary**")
+    with st.container(border=True):
+        st.write(evaluation["ai_summary"])
+
+    with st.expander("Show full reasoning"):
+        st.write(evaluation["ai_reasoning"])
+
 
 st.divider()
 st.subheader("Inspect a ticket")
@@ -192,8 +309,9 @@ selected_id = st.selectbox(
 )
 
 if selected_id:
-    with st.expander(f"Ticket {selected_id}", expanded=True):
-        st.info(
-            "Detail view (raw ticket, ban record, AI evaluation) is built "
-            "in Step 5 of planning/phase-3-checklist.md."
-        )
+    detail = db.get_ticket_detail(selected_id)
+    if detail is None:
+        st.warning(f"Ticket {selected_id} no longer exists.")
+    else:
+        with st.expander(f"Ticket {selected_id}", expanded=True):
+            _render_detail(detail)
