@@ -15,6 +15,16 @@ import streamlit as st
 import db
 
 
+@st.cache_data(ttl=300)
+def _load_date_bounds():
+    return db.get_ticket_date_bounds()
+
+
+@st.cache_data(ttl=300)
+def _load_analytics(date_from, date_to):
+    return db.get_analytics_data(date_from=date_from, date_to=date_to)
+
+
 st.set_page_config(
     page_title="Analytics - Ticket Tech Titan",
     layout="wide",
@@ -86,18 +96,25 @@ def _render_empty(message: str) -> None:
     st.info(message)
 
 
-@st.cache_data(ttl=300)
-def _load_analytics():
-    return db.get_analytics_data()
+min_date, max_date = _load_date_bounds()
 
+st.subheader("Date range")
+col_from, col_to = st.columns(2)
+date_from = col_from.date_input(
+    "From", value=min_date, min_value=min_date, max_value=max_date
+)
+date_to = col_to.date_input(
+    "To", value=max_date, min_value=min_date, max_value=max_date
+)
 
 with st.spinner("Loading analytics…"):
-    analytics = _load_analytics()
+    analytics = _load_analytics(date_from, date_to)
 
 category_df = _category_dataframe(analytics["category_breakdown"])
 detection_df = _detection_dataframe(analytics["detection_method_counts"])
 volume_df = _volume_dataframe(analytics["volume_over_time"])
 admissions = analytics["admission_rates"] or {}
+confidence_scores = analytics.get("confidence_scores", [])
 
 total_evaluated = _to_int(admissions.get("total"))
 admitted_cheating = _to_int(admissions.get("admitted_cheating"))
@@ -226,10 +243,31 @@ with right:
         st.plotly_chart(fig, width="stretch")
 
 st.divider()
+st.subheader("Confidence score distribution")
+if not confidence_scores:
+    _render_empty("No confidence scores available for the selected date range.")
+else:
+    conf_df = pd.DataFrame({"confidence_score": confidence_scores})
+    fig = px.histogram(
+        conf_df,
+        x="confidence_score",
+        nbins=20,
+        range_x=[0.0, 1.0],
+        labels={"confidence_score": "Confidence score", "count": "Tickets"},
+        color_discrete_sequence=["#2563EB"],
+    )
+    fig.update_layout(
+        bargap=0.05,
+        margin=dict(l=0, r=20, t=10, b=0),
+        yaxis_title="Tickets",
+    )
+    st.plotly_chart(fig, width="stretch")
+
+st.divider()
 st.subheader("Raw aggregates")
 
-tab_category, tab_detection, tab_volume = st.tabs(
-    ["Categories", "Detection methods", "Volume"]
+tab_category, tab_detection, tab_volume, tab_confidence = st.tabs(
+    ["Categories", "Detection methods", "Volume", "Confidence scores"]
 )
 
 with tab_category:
@@ -251,3 +289,16 @@ with tab_volume:
         display_volume = volume_df.copy()
         display_volume["date"] = display_volume["date"].dt.date
         st.dataframe(display_volume, width="stretch", hide_index=True)
+
+with tab_confidence:
+    if not confidence_scores:
+        _render_empty("No confidence scores to display.")
+    else:
+        conf_stats = pd.Series(confidence_scores, name="confidence_score")
+        st.dataframe(
+            conf_stats.describe().rename("value").reset_index().rename(
+                columns={"index": "statistic"}
+            ),
+            width="stretch",
+            hide_index=True,
+        )

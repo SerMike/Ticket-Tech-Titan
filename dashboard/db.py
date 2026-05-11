@@ -13,6 +13,7 @@ out of sync.
 """
 
 import sys
+from datetime import date as _date
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +37,7 @@ __all__ = [
     "update_ticket_status",
     "get_analytics_data",
     "get_summary_stats",
+    "get_ticket_date_bounds",
 ]
 
 
@@ -243,43 +245,59 @@ def get_summary_stats() -> dict[str, int]:
 # Analytics aggregates
 # ---------------------------------------------------------------------------
 
-def get_analytics_data() -> dict[str, Any]:
+def get_analytics_data(
+    date_from: _date | None = None,
+    date_to: _date | None = None,
+) -> dict[str, Any]:
     """Return the aggregate counts the analytics page needs.
 
-    One round-trip per chart keeps each query simple and readable.
-    The shape of the returned dict is the contract for the analytics
-    page in Step 6:
+    All queries filter by ``support_tickets.created_at`` (submission
+    date). Pass ``date_from`` / ``date_to`` to scope results to a
+    window; omit both to get all-time aggregates (defaults to a very
+    wide sentinel range so every query stays parameterized uniformly).
 
     ``category_breakdown``: list of {ai_category, count}, descending.
     ``admission_rates``: {admitted_cheating, admitted_exploit, total}
-        where total is the number of evaluated tickets.
+        where total is evaluated tickets in the window.
     ``detection_method_counts``: list of {detection_method, count}
         for tickets that have a matching ban record.
-    ``volume_over_time``: list of {date, count} of tickets submitted
-        per calendar day, ascending.
+    ``volume_over_time``: list of {date, count} per calendar day.
+    ``confidence_scores``: list of floats for evaluated tickets.
     """
+    if date_from is None:
+        date_from = _date(2000, 1, 1)
+    if date_to is None:
+        date_to = _date(2099, 12, 31)
+    dp = (date_from, date_to)
+
     conn = get_connection(autocommit=True)
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(
                 """
-                SELECT ai_category, COUNT(*) AS count
-                FROM support_tickets_with_ai
-                WHERE ai_category IS NOT NULL
-                GROUP BY ai_category
+                SELECT ai.ai_category, COUNT(*) AS count
+                FROM support_tickets_with_ai ai
+                JOIN support_tickets st ON st.ticket_id = ai.ticket_id
+                WHERE ai.ai_category IS NOT NULL
+                  AND st.created_at::date BETWEEN %s AND %s
+                GROUP BY ai.ai_category
                 ORDER BY count DESC
-                """
+                """,
+                dp,
             )
             category_breakdown = [dict(r) for r in cur.fetchall()]
 
             cur.execute(
                 """
                 SELECT
-                    COUNT(*) FILTER (WHERE admitted_cheating) AS admitted_cheating,
-                    COUNT(*) FILTER (WHERE admitted_exploit)  AS admitted_exploit,
-                    COUNT(*)                                   AS total
-                FROM support_tickets_with_ai
-                """
+                    COUNT(*) FILTER (WHERE ai.admitted_cheating) AS admitted_cheating,
+                    COUNT(*) FILTER (WHERE ai.admitted_exploit)  AS admitted_exploit,
+                    COUNT(*)                                      AS total
+                FROM support_tickets_with_ai ai
+                JOIN support_tickets st ON st.ticket_id = ai.ticket_id
+                WHERE st.created_at::date BETWEEN %s AND %s
+                """,
+                dp,
             )
             admission_rates = dict(cur.fetchone())
 
@@ -288,9 +306,11 @@ def get_analytics_data() -> dict[str, Any]:
                 SELECT bd.detection_method, COUNT(*) AS count
                 FROM support_tickets st
                 JOIN ban_database bd ON bd.user_id = st.user_id
+                WHERE st.created_at::date BETWEEN %s AND %s
                 GROUP BY bd.detection_method
                 ORDER BY count DESC
-                """
+                """,
+                dp,
             )
             detection_method_counts = [dict(r) for r in cur.fetchall()]
 
@@ -298,17 +318,55 @@ def get_analytics_data() -> dict[str, Any]:
                 """
                 SELECT DATE(created_at) AS date, COUNT(*) AS count
                 FROM support_tickets
+                WHERE created_at::date BETWEEN %s AND %s
                 GROUP BY DATE(created_at)
                 ORDER BY DATE(created_at)
-                """
+                """,
+                dp,
             )
             volume_over_time = [dict(r) for r in cur.fetchall()]
+
+            cur.execute(
+                """
+                SELECT ai.confidence_score
+                FROM support_tickets_with_ai ai
+                JOIN support_tickets st ON st.ticket_id = ai.ticket_id
+                WHERE ai.confidence_score IS NOT NULL
+                  AND st.created_at::date BETWEEN %s AND %s
+                """,
+                dp,
+            )
+            confidence_scores = [float(r["confidence_score"]) for r in cur.fetchall()]
 
         return {
             "category_breakdown": category_breakdown,
             "admission_rates": admission_rates,
             "detection_method_counts": detection_method_counts,
             "volume_over_time": volume_over_time,
+            "confidence_scores": confidence_scores,
         }
+    finally:
+        conn.close()
+
+
+def get_ticket_date_bounds() -> tuple[_date, _date]:
+    """Return the earliest and latest ticket submission dates.
+
+    Used to initialise the analytics date-range picker. Falls back to
+    a 90-day window ending today if the table is empty.
+    """
+    from datetime import timedelta
+
+    conn = get_connection(autocommit=True)
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT MIN(created_at::date), MAX(created_at::date) FROM support_tickets"
+            )
+            row = cur.fetchone()
+        if row and row[0]:
+            return row[0], row[1]
+        today = _date.today()
+        return today - timedelta(days=90), today
     finally:
         conn.close()
