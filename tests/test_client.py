@@ -1,42 +1,49 @@
-"""test_client.py — Smoke test for the Anthropic client wrapper.
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
-Sends a tiny "say hello" prompt and asserts a non-empty response. This
-verifies the API key, model name, and SDK wiring all work end-to-end.
+import pytest
 
-Run directly:
-    python tests/test_client.py
-"""
-
-import sys
-from pathlib import Path
-
-# Allow running this file directly (python tests/test_client.py) by
-# adding the project root to sys.path so `evaluation.client` resolves.
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-from evaluation.client import call_model
+from evaluation import client
 
 
-def test_call_model_returns_non_empty_response():
-    """Smoke test: send a trivial prompt and assert we get something back."""
-    response = call_model(
-        system="You are a helpful assistant. Reply with a single short sentence.",
-        user="Say hello.",
-        max_tokens=64,
+def _response(*texts):
+    return SimpleNamespace(
+        content=[SimpleNamespace(type="text", text=text) for text in texts],
+        stop_reason="end_turn",
     )
-    assert isinstance(response, str), f"Expected str, got {type(response)}"
-    assert len(response.strip()) > 0, "Response was empty or whitespace only"
-    print(f"PASS — model responded: {response!r}")
 
 
-if __name__ == "__main__":
-    try:
-        test_call_model_returns_non_empty_response()
-    except AssertionError as e:
-        print(f"FAIL — {e}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"ERROR — {type(e).__name__}: {e}")
-        sys.exit(1)
+def test_call_model_returns_concatenated_text_blocks():
+    fake_client = SimpleNamespace(messages=SimpleNamespace(create=Mock()))
+    fake_client.messages.create.return_value = _response("hello", " world")
+
+    with patch.object(client, "get_client", return_value=fake_client):
+        result = client.call_model("system", "user", max_tokens=64)
+
+    assert result == "hello world"
+    fake_client.messages.create.assert_called_once_with(
+        model=client.settings.MODEL_NAME,
+        max_tokens=64,
+        system="system",
+        messages=[{"role": "user", "content": "user"}],
+    )
+
+
+def test_call_model_raises_when_response_has_no_text():
+    fake_client = SimpleNamespace(messages=SimpleNamespace(create=Mock()))
+    fake_client.messages.create.return_value = SimpleNamespace(
+        content=[SimpleNamespace(type="tool_use", text="ignored")],
+        stop_reason="end_turn",
+    )
+
+    with patch.object(client, "get_client", return_value=fake_client):
+        with pytest.raises(RuntimeError, match="no text content"):
+            client.call_model("system", "user")
+
+
+def test_get_client_requires_api_key(monkeypatch):
+    monkeypatch.setattr(client.settings, "ANTHROPIC_API_KEY", None)
+    monkeypatch.setattr(client, "_client", None)
+
+    with pytest.raises(RuntimeError, match="ANTHROPIC_API_KEY"):
+        client.get_client()
