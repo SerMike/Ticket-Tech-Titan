@@ -25,6 +25,9 @@ with st.sidebar:
     st.title("Ticket Tech Titan")
     st.caption("AI-powered ban appeal review")
     st.divider()
+    if st.button("🔄 Refresh data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
 
 st.title("Analytics")
 
@@ -83,8 +86,13 @@ def _render_empty(message: str) -> None:
     st.info(message)
 
 
-with st.spinner("Loading analytics..."):
-    analytics = db.get_analytics_data()
+@st.cache_data(ttl=300)
+def _load_analytics():
+    return db.get_analytics_data()
+
+
+with st.spinner("Loading analytics…"):
+    analytics = _load_analytics()
 
 category_df = _category_dataframe(analytics["category_breakdown"])
 detection_df = _detection_dataframe(analytics["detection_method_counts"])

@@ -58,6 +58,9 @@ with st.sidebar:
     st.title("Ticket Tech Titan")
     st.caption("AI-powered ban appeal review")
     st.divider()
+    if st.button("🔄 Refresh data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
 
 st.title("Ticket queue")
 
@@ -66,7 +69,14 @@ st.title("Ticket queue")
 # Load
 # ---------------------------------------------------------------------------
 
-rows = db.get_all_tickets()
+
+@st.cache_data(ttl=300)
+def _load_tickets():
+    return db.get_all_tickets()
+
+
+with st.spinner("Loading tickets…"):
+    rows = _load_tickets()
 df = pd.DataFrame(rows)
 
 
@@ -289,6 +299,7 @@ def _render_detail(detail: dict) -> None:
         if new_status != current_status:
             try:
                 db.update_ticket_status(ticket_id, new_status)
+                st.cache_data.clear()
                 st.toast(
                     f"Ticket {ticket_id}: {current_status} → {new_status}",
                     icon="✅",

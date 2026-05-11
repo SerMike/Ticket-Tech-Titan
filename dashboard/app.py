@@ -24,6 +24,9 @@ with st.sidebar:
     st.title("Ticket Tech Titan")
     st.caption("AI-powered ban appeal review")
     st.divider()
+    if st.button("🔄 Refresh data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
 
 st.title("Dashboard")
 st.write(
@@ -31,7 +34,15 @@ st.write(
     "Use the sidebar to open the queue or the analytics page."
 )
 
-stats = db.get_summary_stats()
+
+@st.cache_data(ttl=60)
+def _load_stats():
+    return db.get_summary_stats()
+
+
+with st.spinner("Loading…"):
+    stats = _load_stats()
+
 col_open, col_denied, col_review = st.columns(3)
 col_open.metric("Open tickets", stats["open_count"])
 col_denied.metric("Auto-denied today", stats["auto_denied_today"])
