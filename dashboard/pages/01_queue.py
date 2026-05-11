@@ -24,16 +24,15 @@ _AI_CATEGORIES = [
 ]
 _UNEVALUATED_LABEL = "Not yet evaluated"
 
-# Column background colors for the ai_category cell. Red for auto-deny
-# (no analyst action needed), green for likely legitimate (priority
-# human review), amber for needs review, orange for admitted cheating,
-# grey for bot/template spam.
+# Dark-theme friendly colors for the ai_category cell. These use saturated
+# fills plus explicit text color so the queue stays readable in Streamlit's
+# dark preview.
 _CATEGORY_COLORS = {
-    "Auto-Deny": "#fddede",
-    "Likely Legitimate": "#dcf4dc",
-    "Needs Review": "#fff2cc",
-    "Admitted to Cheating": "#ffe0b3",
-    "Templated/Bot Appeal": "#e4e4e4",
+    "Auto-Deny": ("#7f1d1d", "#fee2e2"),
+    "Likely Legitimate": ("#14532d", "#dcfce7"),
+    "Needs Review": ("#713f12", "#fef3c7"),
+    "Admitted to Cheating": ("#581c87", "#f3e8ff"),
+    "Templated/Bot Appeal": ("#374151", "#f3f4f6"),
 }
 
 _VISIBLE_COLUMNS = [
@@ -77,6 +76,26 @@ df = pd.DataFrame(rows)
 
 with st.sidebar:
     st.subheader("Filters")
+    st.markdown(
+        """
+        <style>
+        section[data-testid="stSidebar"] div[data-testid="stMultiSelect"]
+        div[data-baseweb="select"] {
+            min-height: 188px !important;
+            height: auto !important;
+            align-items: flex-start !important;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stMultiSelect"]
+        div[data-baseweb="select"] > div {
+            min-height: 188px !important;
+            align-content: flex-start !important;
+            align-items: flex-start !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     selected_categories = st.multiselect(
         "AI category",
@@ -143,11 +162,39 @@ if filtered.empty:
 else:
     display = filtered[_VISIBLE_COLUMNS].reset_index(drop=True)
 
-    def _color_category(val):
-        color = _CATEGORY_COLORS.get(val)
-        return f"background-color: {color}" if color else ""
+    def _checkmark(value) -> str:
+        if pd.isna(value):
+            return ""
+        return "☑" if bool(value) else "☐"
 
-    styled = display.style.map(_color_category, subset=["ai_category"])
+    display["admitted_cheating"] = display["admitted_cheating"].map(_checkmark)
+    display["admitted_exploit"] = display["admitted_exploit"].map(_checkmark)
+
+    def _color_category(val):
+        colors = _CATEGORY_COLORS.get(val)
+        if not colors:
+            return ""
+        background, foreground = colors
+        return (
+            f"background-color: {background}; "
+            f"color: {foreground}; "
+            "font-weight: 700;"
+        )
+
+    def _style_admission(val):
+        if val == "☑":
+            return "color: #60a5fa; font-weight: 900; text-align: center;"
+        return "color: #6b7280; font-weight: 700; text-align: center;"
+
+    styled = (
+        display.style
+        .map(_color_category, subset=["ai_category"])
+        .map(_style_admission, subset=["admitted_cheating", "admitted_exploit"])
+        .set_properties(
+            subset=["admitted_cheating", "admitted_exploit"],
+            **{"text-align": "center"},
+        )
+    )
 
     st.caption(f"Showing {len(display)} of {len(df)} tickets.")
     st.dataframe(
@@ -165,8 +212,14 @@ else:
                 max_value=1.0,
                 format="%.2f",
             ),
-            "admitted_cheating": st.column_config.CheckboxColumn("Adm. cheat"),
-            "admitted_exploit": st.column_config.CheckboxColumn("Adm. exploit"),
+            "admitted_cheating": st.column_config.TextColumn(
+                "Adm. cheat",
+                alignment="center",
+            ),
+            "admitted_exploit": st.column_config.TextColumn(
+                "Adm. exploit",
+                alignment="center",
+            ),
             "status": st.column_config.TextColumn("Status"),
             "created_at": st.column_config.DatetimeColumn(
                 "Submitted", format="YYYY-MM-DD HH:mm"
