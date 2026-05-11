@@ -12,15 +12,14 @@ Usage:
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 
-import psycopg2
-from dotenv import load_dotenv
+# Make the project root importable so `from config.settings import ...` works
+# regardless of the cwd this script is launched from.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-# Load environment variables from the project root .env file
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+from config.settings import get_connection as _get_connection  # noqa: E402
 
 # Every ticket must have these 8 fields to pass validation
 REQUIRED_TICKET_FIELDS = [
@@ -34,21 +33,20 @@ REQUIRED_TICKET_FIELDS = [
 # ---------------------------------------------------------------------------
 
 def get_connection():
-    """Connect to PostgreSQL using DATABASE_URL from .env.
-    Returns a (connection, cursor) tuple. Exits if the connection fails."""
-    db_url = os.getenv("DATABASE_URL")
-    if not db_url:
-        print("ERROR: DATABASE_URL is not set. Add it to your .env file.")
-        sys.exit(1)
+    """Open the shared psycopg2 connection with autocommit enabled.
+
+    Returns a (connection, cursor) tuple to preserve the existing call
+    contract in main(). Exits the CLI with a friendly message if the
+    connection cannot be established, so the ingestion UX is unchanged
+    from before get_connection was promoted to config/settings.py."""
     try:
-        conn = psycopg2.connect(db_url)
-        conn.autocommit = True
-        cur = conn.cursor()
-        print("Connected to PostgreSQL.")
-        return conn, cur
-    except psycopg2.OperationalError as e:
-        print(f"ERROR: Could not connect to database.\n{e}")
+        conn = _get_connection(autocommit=True)
+    except RuntimeError as e:
+        print(f"ERROR: {e}")
         sys.exit(1)
+    cur = conn.cursor()
+    print("Connected to PostgreSQL.")
+    return conn, cur
 
 
 # ---------------------------------------------------------------------------
