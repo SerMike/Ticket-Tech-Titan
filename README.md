@@ -43,9 +43,13 @@ flowchart TD
 
 ## Screenshots
 
-| Queue | Analytics |
-|---|---|
-| ![Queue page](docs/screenshots/queue.png) | ![Analytics page](docs/screenshots/analytics.png) |
+**Ticket queue** — AI-triaged queue with category tags and confidence scores, plus the per-ticket detail view pairing the player's appeal with the internal ban record and the AI's evaluation:
+
+![Queue page](docs/screenshots/queue.png)
+
+**Analytics** — category breakdown, admission rates, detection-method volume, ticket volume over time, and confidence distribution:
+
+![Analytics page](docs/screenshots/analytics.png)
 
 ## Quickstart
 
