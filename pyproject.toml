@@ -2,4 +2,7 @@
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-addopts = "-q"
+addopts = "-q -m 'not integration'"
+markers = [
+    "integration: requires a live PostgreSQL database (deselect with -m 'not integration')",
+]
