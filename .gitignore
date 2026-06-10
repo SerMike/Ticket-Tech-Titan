@@ -32,8 +32,8 @@ build/
 *.swp
 *.swo
 
-# Claude Code
-.claude/worktrees/
+# Claude Code (local tooling config)
+.claude/
 
 # Planning docs (already-tracked files stay tracked; new files are ignored)
 planning/
