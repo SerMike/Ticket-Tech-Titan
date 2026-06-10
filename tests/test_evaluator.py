@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from evaluation.evaluator import EvaluationError, _parse_json, _validate, evaluate_ticket
@@ -77,3 +79,30 @@ def test_evaluate_ticket_returns_clean_schema(monkeypatch):
         "confidence_score": 0.5,
         "ai_reasoning": "Reasoning",
     }
+
+
+def test_evaluate_ticket_raises_on_empty_response(monkeypatch):
+    monkeypatch.setattr("evaluation.evaluator.call_model", lambda **kwargs: "")
+
+    with pytest.raises(EvaluationError, match="not valid JSON"):
+        evaluate_ticket(TICKET, ban_record=None)
+
+
+def test_evaluate_ticket_raises_on_valid_json_but_missing_fields(monkeypatch):
+    payload = {k: v for k, v in VALID_EVALUATION.items() if k != "confidence_score"}
+    monkeypatch.setattr(
+        "evaluation.evaluator.call_model", lambda **kwargs: json.dumps(payload)
+    )
+
+    with pytest.raises(EvaluationError, match="confidence_score"):
+        evaluate_ticket(TICKET, ban_record=None)
+
+
+def test_evaluate_ticket_raises_on_confidence_score_out_of_range(monkeypatch):
+    payload = VALID_EVALUATION | {"confidence_score": 1.5}
+    monkeypatch.setattr(
+        "evaluation.evaluator.call_model", lambda **kwargs: json.dumps(payload)
+    )
+
+    with pytest.raises(EvaluationError, match="out of range"):
+        evaluate_ticket(TICKET, ban_record=None)

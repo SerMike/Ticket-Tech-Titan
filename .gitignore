@@ -7,6 +7,14 @@ __pycache__/
 *$py.class
 *.so
 
+# Test & coverage artifacts
+.pytest_cache/
+.coverage
+
+# Generated performance datasets (recreate with scripts/generate_tickets.py)
+data/perf_tickets.json
+data/perf_bans.json
+
 # Virtual environments
 venv/
 .venv/
