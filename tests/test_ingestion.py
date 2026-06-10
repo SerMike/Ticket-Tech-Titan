@@ -60,6 +60,31 @@ def test_ingest_missing_required_field_fails_without_db_call():
     assert validate_ticket(ticket) == ["ticket_id"]
 
 
+def test_ingest_ticket_with_empty_body_field():
+    # Empty string is a present field — validation only checks presence.
+    cur = Mock()
+    cur.rowcount = 1
+
+    result = ingest_single_ticket(cur, VALID_TICKET | {"ticket_body": ""})
+
+    assert result == "inserted"
+
+
+def test_ingest_ticket_with_unicode_body():
+    cur = Mock()
+    cur.rowcount = 1
+    body = (
+        "I didn’t cheat — my “little brother” played on my café PC… "
+        "désolé, ありがとうございます."
+    )
+
+    result = ingest_single_ticket(cur, VALID_TICKET | {"ticket_body": body})
+
+    assert result == "inserted"
+    _, insert_params = cur.execute.call_args_list[0].args
+    assert body in insert_params
+
+
 def test_ingest_reads_json_file_correctly():
     sample = Path(__file__).resolve().parent.parent / "data" / "sample_tickets.json"
 

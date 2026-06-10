@@ -1,6 +1,8 @@
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+import anthropic
+import httpx
 import pytest
 
 from evaluation import client
@@ -39,6 +41,38 @@ def test_call_model_raises_when_response_has_no_text():
     with patch.object(client, "get_client", return_value=fake_client):
         with pytest.raises(RuntimeError, match="no text content"):
             client.call_model("system", "user")
+
+
+def _connection_error():
+    return anthropic.APIConnectionError(
+        request=httpx.Request("POST", "https://api.anthropic.com")
+    )
+
+
+def test_call_model_retries_on_transient_error(monkeypatch):
+    fake_client = SimpleNamespace(messages=SimpleNamespace(create=Mock(
+        side_effect=[_connection_error(), _response("recovered")]
+    )))
+    monkeypatch.setattr(client.time, "sleep", lambda s: None)
+
+    with patch.object(client, "get_client", return_value=fake_client):
+        result = client.call_model("system", "user")
+
+    assert result == "recovered"
+    assert fake_client.messages.create.call_count == 2
+
+
+def test_call_model_raises_after_max_retries(monkeypatch):
+    fake_client = SimpleNamespace(messages=SimpleNamespace(create=Mock(
+        side_effect=_connection_error()
+    )))
+    monkeypatch.setattr(client.time, "sleep", lambda s: None)
+
+    with patch.object(client, "get_client", return_value=fake_client):
+        with pytest.raises(anthropic.APIConnectionError):
+            client.call_model("system", "user")
+
+    assert fake_client.messages.create.call_count == client.MAX_ATTEMPTS
 
 
 def test_get_client_requires_api_key(monkeypatch):
