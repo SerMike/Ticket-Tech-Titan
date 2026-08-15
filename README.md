@@ -180,11 +180,17 @@ reference/          Industry ban-policy reference docs
 config/
   settings.py       DB connection, ALLOWED_STATUSES
 
-tests/              55 offline unit tests + 3 opt-in integration tests
+tests/              69 offline unit tests + 3 opt-in integration tests
 scripts/
+  run_api.cmd          Launch the API + dashboard on Windows
   generate_tickets.py  Synthetic ticket/ban generator for perf testing
+  capture_screenshots.py  Regenerates the README screenshots
   smoke_client.py      Manual live-API smoke test
   smoke_evaluate.py    Manual end-to-end evaluation spot-check
 docs/
   performance-notes.md Performance baseline + scaling analysis
+
+design_handoff_industry_dashboard/
+                    Design source of truth for web/ — prototype, tokens,
+                    and rendered references for both themes
 ```
