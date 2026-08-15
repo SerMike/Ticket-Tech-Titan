@@ -27,7 +27,7 @@ def get_connection(autocommit: bool = False):
     """Open a psycopg2 connection using DATABASE_URL.
 
     Raises RuntimeError if DATABASE_URL is unset or the connection fails,
-    so callers (CLI, Streamlit) can decide how to surface the error
+    so callers (CLI, API) can decide how to surface the error
     instead of sys.exiting the process.
 
     Args:
