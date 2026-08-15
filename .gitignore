@@ -35,7 +35,7 @@ build/
 # Claude Code (local tooling config)
 .claude/
 
-# Planning docs (already-tracked files stay tracked; new files are ignored)
+# Planning docs and checklists — kept locally, never published
 planning/
 
 # Developer guide — kept locally, not published

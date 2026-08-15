@@ -51,6 +51,10 @@ flowchart TD
 
 ![Analytics page](docs/screenshots/analytics.png)
 
+**Dashboard, light theme** — the same interface follows your OS light/dark setting, or the toggle in the top-right:
+
+![Dashboard page in light mode](docs/screenshots/dashboard-light.png)
+
 ## Quickstart
 
 ### Zero setup — run the tests

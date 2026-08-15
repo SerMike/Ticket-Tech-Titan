@@ -3,7 +3,9 @@
 The dashboard is a single-page app: the three views are swapped
 client-side rather than served at their own URLs, so this script drives
 the nav the way a user would, then takes a full-page screenshot of each.
-Captures docs/screenshots/queue.png and analytics.png in dark mode.
+Captures queue.png and analytics.png in dark mode, plus dashboard-light.png
+so the README shows both themes. Theme follows prefers-color-scheme when
+localStorage holds no choice, which is why each theme gets its own context.
 
 Requires the API running on localhost:8000 (``uvicorn api.main:app``)
 and a local Edge install (uses Playwright's channel="msedge", no browser
@@ -34,18 +36,22 @@ def show_view(page, view):
     settle(page)
 
 
+def new_page(browser, scheme):
+    context = browser.new_context(
+        color_scheme=scheme,
+        viewport={"width": WIDTH, "height": 1100},
+    )
+    page = context.new_page()
+    page.goto(BASE)
+    settle(page)
+    return page
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch(channel="msedge", headless=True)
-        # No stored theme, so the app follows prefers-color-scheme.
-        context = browser.new_context(
-            color_scheme="dark",
-            viewport={"width": WIDTH, "height": 1100},
-        )
-        page = context.new_page()
-        page.goto(BASE)
-        settle(page)
+        page = new_page(browser, "dark")
 
         # --- Queue: hide unevaluated tickets so AI categories show, then
         # select a visible row so the detail panel shows a real evaluation
@@ -62,6 +68,11 @@ def main() -> int:
         show_view(page, "analytics")
         page.screenshot(path=str(OUT / "analytics.png"), full_page=True)
         print("analytics.png")
+
+        # --- Dashboard in light mode, so the README shows both themes ---
+        light = new_page(browser, "light")
+        light.screenshot(path=str(OUT / "dashboard-light.png"), full_page=True)
+        print("dashboard-light.png")
 
         browser.close()
     return 0
