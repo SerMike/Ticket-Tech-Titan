@@ -38,6 +38,9 @@ build/
 # Planning docs (already-tracked files stay tracked; new files are ignored)
 planning/
 
+# Developer guide — kept locally, not published
+ticket-tech-titan-dev-guide*.docx
+
 # OS
 .DS_Store
 Thumbs.db
