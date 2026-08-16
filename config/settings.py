@@ -4,12 +4,21 @@ import os
 from pathlib import Path
 
 import psycopg2
-from dotenv import load_dotenv
+from dotenv import dotenv_values, load_dotenv
 
-# Load .env from the project root. override=True ensures values in .env
-# take precedence over any pre-existing OS env vars (e.g. an empty
-# ANTHROPIC_API_KEY left over from a prior shell session).
-load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
+# Load .env from the project root. Real environment variables win, so
+# `DATABASE_URL=... python database/init_db.py` points the whole project at
+# that database — see "Pointing at a non-default database" in the README.
+_ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(_ENV_PATH)
+
+# One exception: a variable exported as an empty string (classically an
+# ANTHROPIC_API_KEY left over from a prior shell session) still shadows .env
+# above, because python-dotenv only tests for presence. An empty value is
+# never a deliberate choice, so let .env fill it in.
+for _key, _value in dotenv_values(_ENV_PATH).items():
+    if _value and not os.environ.get(_key):
+        os.environ[_key] = _value
 
 # Database
 DATABASE_URL = os.getenv("DATABASE_URL")

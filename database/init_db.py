@@ -1,19 +1,15 @@
 """init_db.py — Creates tables and seeds default categories."""
 
-import os
 import sys
 from pathlib import Path
 
-import psycopg2
-from dotenv import load_dotenv
+# Make the project root importable so `from config.settings import ...` works
+# regardless of the cwd this script is launched from. Config lives there and
+# nowhere else: this script drops every table, so it must resolve
+# DATABASE_URL exactly the way the rest of the project does.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-# Load .env from project root
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    print("ERROR: DATABASE_URL is not set. Add it to your .env file.")
-    sys.exit(1)
+from config.settings import get_connection  # noqa: E402
 
 SCHEMA_FILE = Path(__file__).resolve().parent / "schema.sql"
 
@@ -28,12 +24,14 @@ DEFAULT_CATEGORIES = [
 
 def main():
     try:
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.autocommit = True
+        conn = get_connection(autocommit=True)
         cur = conn.cursor()
-        print("Connected to PostgreSQL.")
-    except psycopg2.OperationalError as e:
-        print(f"ERROR: Could not connect to database.\n{e}")
+        # Name the target: the next step drops every table, and an exported
+        # DATABASE_URL silently redirects this script away from .env.
+        print(f"Connected to PostgreSQL: {conn.info.dbname} "
+              f"on {conn.info.host}:{conn.info.port}")
+    except RuntimeError as e:
+        print(f"ERROR: {e}")
         sys.exit(1)
 
     # Create tables
