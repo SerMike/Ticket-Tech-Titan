@@ -10,6 +10,10 @@ __pycache__/
 # Test & coverage artifacts
 .pytest_cache/
 .coverage
+htmlcov/
+
+# Office lock files (the ~$ prefix mangles the name, so a filename glob misses them)
+~$*
 
 # Generated performance datasets (recreate with scripts/generate_tickets.py)
 data/perf_tickets.json

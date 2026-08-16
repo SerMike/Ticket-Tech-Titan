@@ -1,7 +1,7 @@
 /* app.js — Ticket Tech Titan single-page dashboard.
  *
  * Vanilla-JS port of the design prototype's logic class (see
- * design_handoff_industry_dashboard/Ticket Tech Titan.dc.html): one
+ * docs/design/Ticket Tech Titan.dc.html): one
  * state object, one render() that rebuilds #app, delegated event
  * listeners. Data comes from the FastAPI endpoints in api/main.py;
  * all filtering/aggregation stays client-side, matching the prototype.
