@@ -1,19 +1,14 @@
 """load_sample_data.py — Loads sample tickets and bans into the database."""
 
 import json
-import os
 import sys
 from pathlib import Path
 
-import psycopg2
-from dotenv import load_dotenv
+# Make the project root importable so `from config.settings import ...` works
+# regardless of the cwd this script is launched from.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    print("ERROR: DATABASE_URL is not set. Add it to your .env file.")
-    sys.exit(1)
+from config.settings import get_connection  # noqa: E402
 
 DATA_DIR = Path(__file__).resolve().parent
 
@@ -29,12 +24,11 @@ def load_json(filename):
 
 def main():
     try:
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.autocommit = True
+        conn = get_connection(autocommit=True)
         cur = conn.cursor()
         print("Connected to PostgreSQL.")
-    except psycopg2.OperationalError as e:
-        print(f"ERROR: Could not connect to database.\n{e}")
+    except RuntimeError as e:
+        print(f"ERROR: {e}")
         sys.exit(1)
 
     # Load tickets

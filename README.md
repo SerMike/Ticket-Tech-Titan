@@ -97,6 +97,31 @@ psql "$DATABASE_URL" -f database/migrations/001_add_token_usage.sql
 ```
 
 <details>
+<summary><b>Pointing at a non-default database</b></summary>
+
+Every entry point resolves `DATABASE_URL` the same way: a real environment
+variable takes precedence over `.env`. Exporting it once therefore redirects the
+whole project — schema, ingestion, pipeline, dashboard and API alike:
+
+```
+$env:DATABASE_URL = "postgresql://localhost:5432/scratch"   # cmd: set DATABASE_URL=...
+python database/init_db.py
+python ingestion/ingest_ticket.py --tickets data/sample_tickets.json --bans data/sample_bans.json
+```
+
+Set it in the *same* shell for every command in the sequence. A new shell falls
+back to `.env`, and since `init_db.py` drops every table in whichever database it
+resolves, a half-redirected sequence is how you overwrite the database you meant
+to leave alone.
+
+An empty value is ignored rather than obeyed — `DATABASE_URL=` falls back to
+`.env` — so a cleared variable can't turn into a broken connection string. The
+same rule is what keeps a stale empty `ANTHROPIC_API_KEY` from shadowing the
+real key in `.env`.
+
+</details>
+
+<details>
 <summary><b>Using your own PostgreSQL instead of Docker</b></summary>
 
 1. Create a database named `ticket_tech_titan`.
