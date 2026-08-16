@@ -111,6 +111,42 @@ def test_analytics_defaults_to_none_when_dates_omitted(client, monkeypatch):
 
 
 # ---------------------------------------------------------------------------
+# Costs
+# ---------------------------------------------------------------------------
+
+def test_costs_returns_the_db_payload(client, monkeypatch):
+    payload = {
+        "by_day": [],
+        "by_model": [],
+        "totals": {"cost_usd": 0.6012, "untracked": 500},
+    }
+    monkeypatch.setattr(main.db, "get_cost_data", Mock(return_value=payload))
+
+    res = client.get("/api/costs")
+
+    assert res.status_code == 200
+    assert res.json() == payload
+
+
+def test_costs_passes_dates_through(client, monkeypatch):
+    fake = Mock(return_value={"by_day": [], "by_model": [], "totals": {}})
+    monkeypatch.setattr(main.db, "get_cost_data", fake)
+
+    client.get("/api/costs?date_from=2026-04-01&date_to=2026-04-30")
+
+    fake.assert_called_once_with(date(2026, 4, 1), date(2026, 4, 30))
+
+
+def test_costs_defaults_to_none_when_dates_omitted(client, monkeypatch):
+    fake = Mock(return_value={"by_day": [], "by_model": [], "totals": {}})
+    monkeypatch.setattr(main.db, "get_cost_data", fake)
+
+    client.get("/api/costs")
+
+    fake.assert_called_once_with(None, None)
+
+
+# ---------------------------------------------------------------------------
 # Status write path
 # ---------------------------------------------------------------------------
 
