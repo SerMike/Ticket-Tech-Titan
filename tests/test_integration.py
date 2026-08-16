@@ -91,6 +91,37 @@ def test_pipeline_idempotency(seeded_ticket):
         conn.close()
 
 
+def test_pipeline_persists_token_usage(seeded_ticket):
+    """The only test that proves migration 001 was actually applied.
+
+    Every other cost test mocks the cursor, so a database missing the three
+    columns would still show a green suite while the pipeline failed on every
+    ticket.
+    """
+    if not settings.ANTHROPIC_API_KEY:
+        pytest.skip("ANTHROPIC_API_KEY not set")
+    tid = seeded_ticket["ticket_id"]
+
+    stats = rp.run_pipeline(force=False, ticket_id=tid, limit=None)
+    assert (stats.succeeded, stats.failed) == (1, 0)
+
+    conn = psycopg2.connect(settings.DATABASE_URL)
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT input_tokens, output_tokens, model_name "
+                "FROM support_tickets_with_ai WHERE ticket_id = %s",
+                (tid,),
+            )
+            input_tokens, output_tokens, model_name = cur.fetchone()
+    finally:
+        conn.close()
+
+    assert input_tokens > 0
+    assert output_tokens > 0
+    assert model_name == settings.MODEL_NAME
+
+
 def test_status_update_creates_history_row(seeded_ticket):
     tid = seeded_ticket["ticket_id"]
 
