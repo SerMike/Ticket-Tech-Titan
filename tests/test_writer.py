@@ -67,6 +67,36 @@ def test_save_evaluation_does_not_commit():
     conn.commit.assert_not_called()
 
 
+def test_save_evaluation_persists_token_usage():
+    conn, cur = _mock_conn(inserted=True)
+    data = VALID_RESULT | {
+        "input_tokens": 2480,
+        "output_tokens": 317,
+        "model_name": "claude-sonnet-4-6",
+    }
+
+    save_evaluation(conn, data)
+
+    _, params = cur.execute.call_args.args
+    assert params[8:] == (2480, 317, "claude-sonnet-4-6")
+
+
+def test_save_evaluation_writes_null_usage_when_absent():
+    # Usage is optional: a payload without it must persist NULLs, not raise.
+    # NULL is what the cost layer reads as "untracked".
+    conn, cur = _mock_conn(inserted=True)
+
+    save_evaluation(conn, VALID_RESULT.copy())
+
+    _, params = cur.execute.call_args.args
+    assert params[8:] == (None, None, None)
+
+
+def test_validate_accepts_payload_without_usage():
+    # Pins the decision to keep usage out of REQUIRED_FIELDS.
+    _validate(VALID_RESULT.copy())
+
+
 def test_save_evaluation_rejects_invalid_payload():
     conn, _ = _mock_conn(inserted=True)
     data = VALID_RESULT.copy()
