@@ -29,11 +29,15 @@ def main() -> int:
         print(f"ERROR - {type(exc).__name__}: {exc}")
         return 1
 
-    if not isinstance(response, str) or not response.strip():
+    if not isinstance(response.text, str) or not response.text.strip():
         print("FAIL - response was empty or whitespace only")
         return 1
 
-    print(f"PASS - model responded: {response!r}")
+    print(f"PASS - model responded: {response.text!r}")
+    print(
+        f"       {response.model_name}: "
+        f"{response.input_tokens} in / {response.output_tokens} out tokens"
+    )
     return 0
 
 
