@@ -58,6 +58,14 @@ CREATE TABLE IF NOT EXISTS support_tickets_with_ai (
     admitted_exploit BOOLEAN,
     confidence_score DECIMAL,
     ai_reasoning TEXT,
+    -- Token usage for the API call that produced this row. Nullable: rows
+    -- written before migration 001 have none, and NULL must read as
+    -- "untracked" rather than as zero cost. The dollar figure is NOT stored
+    -- — it is computed at query time from the price table in
+    -- config/settings.py, so a price correction re-prices all history.
+    input_tokens INT,
+    output_tokens INT,
+    model_name VARCHAR(100),
     processed_at TIMESTAMP DEFAULT NOW()
 );
 
