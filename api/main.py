@@ -72,6 +72,11 @@ def analytics(date_from: date | None = None, date_to: date | None = None):
     return db.get_analytics_data(date_from, date_to)
 
 
+@app.get("/api/costs")
+def costs(date_from: date | None = None, date_to: date | None = None):
+    return db.get_cost_data(date_from, date_to)
+
+
 @app.get("/api/stats")
 def stats():
     return db.get_summary_stats()

@@ -2,6 +2,8 @@
 
 Provides a single entry point for making Claude API calls so that
 retries, error handling, and model configuration live in one place.
+Calls return a ModelResponse rather than a bare string so the token
+counts the API billed for reach the caller and can be persisted.
 
 Retry policy
 ------------
@@ -16,12 +18,40 @@ just wastes quota.
 import logging
 import random
 import time
+from dataclasses import dataclass
 
 import anthropic
 
 from config import settings
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Return contract
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class ModelResponse:
+    """Provider-agnostic result of one model call.
+
+    Deliberately carries no Anthropic types: a future adapter for another
+    provider normalizes into this same shape, so callers never learn which
+    API produced the text.
+
+    Token counts are Optional because not every provider reports usage.
+    Downstream, a missing count means "untracked" — never zero.
+
+    Note: Anthropic's usage object also carries cache_creation_input_tokens
+    and cache_read_input_tokens, which are billed at different rates. We
+    don't enable prompt caching, so they're ignored; turning it on would
+    understate cost until they're captured too.
+    """
+
+    text: str
+    model_name: str
+    input_tokens: int | None
+    output_tokens: int | None
 
 
 # ---------------------------------------------------------------------------
@@ -88,8 +118,8 @@ def _backoff_seconds(attempt: int) -> float:
     return random.uniform(0.0, ceiling)
 
 
-def call_model(system: str, user: str, max_tokens: int = 1024) -> str:
-    """Send a single (system, user) message pair to the model and return text.
+def call_model(system: str, user: str, max_tokens: int = 1024) -> ModelResponse:
+    """Send a single (system, user) message pair to the model.
 
     Retries transient failures (rate limits, 5xx, network timeouts) with
     exponential backoff + jitter, up to MAX_ATTEMPTS total attempts.
@@ -101,7 +131,8 @@ def call_model(system: str, user: str, max_tokens: int = 1024) -> str:
         max_tokens: Cap on response length. 1024 is plenty for our JSON output.
 
     Returns:
-        The raw text content of the model's response.
+        A ModelResponse carrying the raw text content plus the token counts
+        the API billed for, so callers can cost the call.
 
     Raises:
         anthropic.APIError (or subclass) if all retries are exhausted or a
@@ -155,4 +186,12 @@ def call_model(system: str, user: str, max_tokens: int = 1024) -> str:
             f"Anthropic API returned no text content. Stop reason: {response.stop_reason}"
         )
 
-    return "".join(text_parts)
+    # settings.MODEL_NAME, not response.model: the API echoes a resolved
+    # snapshot id (claude-sonnet-4-6-20260114) that matches nothing in a
+    # price table keyed on the alias we configured.
+    return ModelResponse(
+        text="".join(text_parts),
+        model_name=settings.MODEL_NAME,
+        input_tokens=response.usage.input_tokens,
+        output_tokens=response.usage.output_tokens,
+    )

@@ -29,6 +29,7 @@ if str(_PROJECT_ROOT) not in sys.path:
 from psycopg2.extras import RealDictCursor  # noqa: E402
 
 from config.settings import ALLOWED_STATUSES, get_connection  # noqa: E402
+from dashboard import cost  # noqa: E402
 
 __all__ = [
     "ALLOWED_STATUSES",
@@ -38,6 +39,7 @@ __all__ = [
     "get_ai_evaluation",
     "update_ticket_status",
     "get_analytics_data",
+    "get_cost_data",
     "get_summary_stats",
     "get_ticket_date_bounds",
 ]
@@ -349,6 +351,178 @@ def get_analytics_data(
         }
     finally:
         conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Cost aggregates
+# ---------------------------------------------------------------------------
+
+def get_cost_data(
+    date_from: _date | None = None,
+    date_to: _date | None = None,
+) -> dict[str, Any]:
+    """Return LLM spend for the cost view, priced at query time.
+
+    Groups by day *and* model, because the price depends on the model — the
+    fold below applies each group's own rate. ``cost.cost_usd`` is linear, so
+    pricing a group's summed tokens gives the same answer as pricing each
+    evaluation and adding them up.
+
+    Windows on ``support_tickets.created_at`` (submission date) rather than
+    ``processed_at``, for two reasons: it lines the cost curve up with the
+    volume curve under the same date picker, and the existing evaluations were
+    produced in one bulk run, which under ``processed_at`` would collapse the
+    whole chart into a single spike. The tradeoff is that spend is attributed
+    to the day a ticket arrived, not the day the API call was billed.
+
+    ``by_day``: list of {date, evaluations, untracked, input_tokens,
+        output_tokens, cost_usd, cumulative_cost_usd}, ascending. The running
+        total is computed here so the chart is a straight pass over one array.
+    ``by_model``: list of {model_name, evaluations, input_tokens,
+        output_tokens, cost_usd, priced}. ``priced`` false with a null cost is
+        the "price unknown" case.
+    ``totals``: {evaluations, tracked, untracked, unpriced, input_tokens,
+        output_tokens, cost_usd, avg_cost_per_ticket_usd}. The average is None,
+        not 0, when nothing could be priced.
+
+    Evaluations with no token usage are counted but never contribute dollars.
+    """
+    if date_from is None:
+        date_from = _date(2000, 1, 1)
+    if date_to is None:
+        date_to = _date(2099, 12, 31)
+    dp = (date_from, date_to)
+
+    conn = get_connection(autocommit=True)
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            # COUNT(ai.input_tokens) skips NULLs, so evaluations - tracked is
+            # the untracked count for the group. NULL tokens contribute 0 to
+            # the SUMs, so untracked rows stay visible in the counts without
+            # distorting the totals.
+            cur.execute(
+                """
+                SELECT
+                    st.created_at::date               AS date,
+                    ai.model_name,
+                    COUNT(*)                          AS evaluations,
+                    COUNT(ai.input_tokens)            AS tracked,
+                    COALESCE(SUM(ai.input_tokens), 0)  AS input_tokens,
+                    COALESCE(SUM(ai.output_tokens), 0) AS output_tokens
+                FROM support_tickets_with_ai ai
+                JOIN support_tickets st ON st.ticket_id = ai.ticket_id
+                WHERE st.created_at::date BETWEEN %s AND %s
+                GROUP BY st.created_at::date, ai.model_name
+                ORDER BY st.created_at::date
+                """,
+                dp,
+            )
+            groups = [dict(r) for r in cur.fetchall()]
+
+        return _fold_cost_groups(groups)
+    finally:
+        conn.close()
+
+
+def _fold_cost_groups(groups: list[dict[str, Any]]) -> dict[str, Any]:
+    """Collapse (date, model) rows into the by_day / by_model / totals shape.
+
+    Split out from the query so the fold — where the money arithmetic lives —
+    can be exercised without a database.
+    """
+    by_day: dict[_date, dict[str, Any]] = {}
+    by_model: dict[str | None, dict[str, Any]] = {}
+    totals = {
+        "evaluations": 0,
+        "tracked": 0,
+        "untracked": 0,
+        "unpriced": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cost_usd": 0.0,
+    }
+
+    for row in groups:
+        tracked = row["tracked"]
+        untracked = row["evaluations"] - tracked
+        group_cost = cost.cost_usd(
+            row["model_name"], row["input_tokens"], row["output_tokens"]
+        )
+        # A tracked group we can't price is "unknown $", distinct from the
+        # untracked rows that had no tokens to price in the first place.
+        if group_cost is None and tracked:
+            totals["unpriced"] += tracked
+
+        day = by_day.setdefault(
+            row["date"],
+            {
+                "date": row["date"],
+                "evaluations": 0,
+                "untracked": 0,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "cost_usd": 0.0,
+            },
+        )
+        model = by_model.setdefault(
+            row["model_name"],
+            {
+                "model_name": row["model_name"],
+                "evaluations": 0,
+                "untracked": 0,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "cost_usd": 0.0,
+                # Priced evaluations behind cost_usd. Zero of them means the
+                # figure is meaningless and gets nulled below.
+                "_priced": 0,
+            },
+        )
+
+        for bucket in (day, model):
+            bucket["evaluations"] += row["evaluations"]
+            bucket["untracked"] += untracked
+            bucket["input_tokens"] += row["input_tokens"]
+            bucket["output_tokens"] += row["output_tokens"]
+
+        totals["evaluations"] += row["evaluations"]
+        totals["tracked"] += tracked
+        totals["untracked"] += untracked
+        totals["input_tokens"] += row["input_tokens"]
+        totals["output_tokens"] += row["output_tokens"]
+
+        if group_cost is not None:
+            day["cost_usd"] += group_cost
+            model["cost_usd"] += group_cost
+            model["_priced"] += tracked
+            totals["cost_usd"] += group_cost
+
+    for model in by_model.values():
+        # A model row with nothing priced behind it — every evaluation
+        # untracked, or the model absent from the price table — reports no
+        # cost at all. Reporting $0.00 would read as "this was free".
+        model["priced"] = model.pop("_priced") > 0
+        if not model["priced"]:
+            model["cost_usd"] = None
+
+    days = sorted(by_day.values(), key=lambda d: d["date"])
+    running = 0.0
+    for day in days:
+        running += day["cost_usd"]
+        day["cumulative_cost_usd"] = running
+
+    priced_count = totals["tracked"] - totals["unpriced"]
+    totals["avg_cost_per_ticket_usd"] = (
+        totals["cost_usd"] / priced_count if priced_count else None
+    )
+
+    return {
+        "by_day": days,
+        "by_model": sorted(
+            by_model.values(), key=lambda m: m["evaluations"], reverse=True
+        ),
+        "totals": totals,
+    }
 
 
 def get_ticket_date_bounds() -> tuple[_date, _date]:

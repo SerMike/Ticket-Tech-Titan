@@ -69,6 +69,11 @@ def main() -> int:
         page.screenshot(path=str(OUT / "analytics.png"), full_page=True)
         print("analytics.png")
 
+        # --- Costs ---
+        show_view(page, "costs")
+        page.screenshot(path=str(OUT / "costs.png"), full_page=True)
+        print("costs.png")
+
         # --- Dashboard in light mode, so the README shows both themes ---
         light = new_page(browser, "light")
         light.screenshot(path=str(OUT / "dashboard-light.png"), full_page=True)

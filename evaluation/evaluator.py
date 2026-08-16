@@ -140,6 +140,8 @@ def evaluate_ticket(ticket: dict, ban_record: dict | None) -> dict:
             user_id (str) — copied from the source ticket (FK)
             ai_summary (str), ai_category (str), admitted_cheating (bool),
             admitted_exploit (bool), confidence_score (float), ai_reasoning (str)
+            input_tokens (int|None), output_tokens (int|None),
+            model_name (str) — usage metadata for cost reporting
 
     Raises:
         EvaluationError: model returned malformed JSON or failed schema
@@ -153,9 +155,10 @@ def evaluate_ticket(ticket: dict, ban_record: dict | None) -> dict:
     user_prompt = build_user_prompt(ticket, ban_record)
 
     # Step 2: Call the model. Errors from the API bubble up intentionally.
-    raw_response = call_model(
+    response = call_model(
         system=SYSTEM_PROMPT, user=user_prompt, max_tokens=1024
     )
+    raw_response = response.text
 
     # Step 3: Parse JSON. Log the raw response on failure for debugging.
     try:
@@ -188,4 +191,10 @@ def evaluate_ticket(ticket: dict, ban_record: dict | None) -> dict:
         "admitted_exploit": parsed["admitted_exploit"],
         "confidence_score": float(parsed["confidence_score"]),
         "ai_reasoning": parsed["ai_reasoning"],
+        # Usage metadata, not model output — deliberately excluded from
+        # _validate() and from writer.REQUIRED_FIELDS, since a provider
+        # that doesn't report usage would leave these None.
+        "input_tokens": response.input_tokens,
+        "output_tokens": response.output_tokens,
+        "model_name": response.model_name,
     }

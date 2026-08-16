@@ -33,9 +33,11 @@ flowchart TD
     subgraph DASH["Dashboard (FastAPI + web/)"]
         Q["Queue + ticket detail"]
         AN["Analytics charts"]
+        CO["Cost breakdown"]
     end
     AI --> Q
     AI --> AN
+    AI --> CO
     ST --> Q
     Q -->|"status updates"| ST
     Q -->|"audit trail"| TH[("ticket_status_history")]
@@ -50,6 +52,10 @@ flowchart TD
 **Analytics** — category breakdown, admission rates, detection-method volume, ticket volume over time, and confidence distribution:
 
 ![Analytics page](docs/screenshots/analytics.png)
+
+**Costs** — what each AI decision actually cost: spend per day, cumulative spend, spend by model, and API spend set against the analyst time it displaced at a configurable hourly rate:
+
+![Costs page](docs/screenshots/costs.png)
 
 **Dashboard, light theme** — the same interface follows your OS light/dark setting, or the toggle in the top-right:
 
@@ -82,6 +88,14 @@ uvicorn api.main:app                  # http://localhost:8000
 
 Drop `--limit 5` to evaluate all 50 sample tickets (well under a dollar).
 
+`init_db.py` is first-time setup only — it drops every table. To pick up schema
+changes on a database that already holds data, apply the numbered files in
+[`database/migrations/`](database/migrations/) instead:
+
+```
+psql "$DATABASE_URL" -f database/migrations/001_add_token_usage.sql
+```
+
 <details>
 <summary><b>Using your own PostgreSQL instead of Docker</b></summary>
 
@@ -97,7 +111,8 @@ Drop `--limit 5` to evaluate all 50 sample tickets (well under a dollar).
 - **The LLM proposes; deterministic rules dispose.** [`auto_deny.py`](evaluation/auto_deny.py) overrides the model's category to Auto-Deny whenever the ban record carries a confirmed technical detection (cheat-engine signature, aim-lock, speed-hack, connection manipulation) — a persuasive appeal can never talk a confirmed cheater out of a ban, no matter what the model says.
 - **Model output is untrusted input.** Every response is parsed and schema-validated in [`evaluator.py`](evaluation/evaluator.py) — required fields, category whitelist, strict booleans, confidence range — before anything touches the database. Malformed output marks the ticket for review; it never corrupts a row.
 - **Idempotent by construction.** Evaluations UPSERT on `ticket_id` ([`writer.py`](evaluation/writer.py)) and the pipeline commits per ticket, so re-runs are safe, re-evaluations replace rather than duplicate, and one bad ticket can't poison a batch.
-- **Offline-testable layering.** 69 tests run with no database or API key — the DB layer, LLM client, and orchestration are all mockable seams. Integration tests exist but are opt-in (`pytest -m integration`).
+- **Cost is measured, not asserted.** Every evaluation records the token counts the API billed for ([`client.py`](evaluation/client.py)); dollars are computed at query time from a price table in [`settings.py`](config/settings.py), so correcting a price re-prices all history without re-running the pipeline. Evaluations with no recorded usage are labelled untracked rather than counted as $0.00 — the return-on-investment claim is only worth making if the number behind it is honest.
+- **Offline-testable layering.** 94 tests run with no database or API key — the DB layer, LLM client, and orchestration are all mockable seams. Integration tests exist but are opt-in (`pytest -m integration`).
 
 ## Performance
 
@@ -137,12 +152,13 @@ sun/moon button to switch between light and dark themes (the choice persists in
 | `GET /api/tickets/{id}/evaluation` | `ai_summary` and `ai_reasoning` for a ticket (404 when unevaluated) |
 | `PATCH /api/tickets/{id}/status` | Body `{"status": "open"\|"pending"\|"closed"}`; returns old + new status, 400 on an invalid status or unknown ticket |
 | `GET /api/analytics?date_from=&date_to=` | Category breakdown, admission rates, detection-method counts, volume over time, confidence scores |
+| `GET /api/costs?date_from=&date_to=` | LLM spend per day and per model plus totals, priced at query time from the token counts stored with each evaluation |
 | `GET /api/stats` | `open_count`, `auto_denied_today`, `needs_review` |
 | `GET /api/date-bounds` | Earliest and latest ticket dates |
 
 ## Running tests
 
-72 tests: 69 unit tests that run fully offline (no DB, no API key) plus 3 integration tests gated behind a marker.
+98 tests: 94 unit tests that run fully offline (no DB, no API key) plus 4 integration tests gated behind a marker.
 
 ```
 pytest                        # unit tests only — no DB or API key required
@@ -163,10 +179,12 @@ web/                Single-page front-end (no build step)
 
 dashboard/
   db.py             All DB queries (read + status update) — the API's seam
+  cost.py           Token counts → dollars, priced at query time
 
 database/
   schema.sql        PostgreSQL schema
   init_db.py        One-shot schema initialiser
+  migrations/       Numbered forward-only migrations, applied by hand
 
 ingestion/
   ingest_ticket.py  JSON ticket + ban record ingestor
@@ -182,9 +200,9 @@ evaluation/
 analytics/          SQL analysis queries
 reference/          Industry ban-policy reference docs
 config/
-  settings.py       DB connection, ALLOWED_STATUSES
+  settings.py       DB connection, ALLOWED_STATUSES, model price table
 
-tests/              69 offline unit tests + 3 opt-in integration tests
+tests/              94 offline unit tests + 4 opt-in integration tests
 scripts/
   run_api.cmd          Launch the API + dashboard on Windows
   generate_tickets.py  Synthetic ticket/ban generator for perf testing

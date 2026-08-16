@@ -8,10 +8,13 @@ import pytest
 from evaluation import client
 
 
-def _response(*texts):
+def _response(*texts, input_tokens=1200, output_tokens=340):
     return SimpleNamespace(
         content=[SimpleNamespace(type="text", text=text) for text in texts],
         stop_reason="end_turn",
+        usage=SimpleNamespace(
+            input_tokens=input_tokens, output_tokens=output_tokens
+        ),
     )
 
 
@@ -22,13 +25,31 @@ def test_call_model_returns_concatenated_text_blocks():
     with patch.object(client, "get_client", return_value=fake_client):
         result = client.call_model("system", "user", max_tokens=64)
 
-    assert result == "hello world"
+    assert result.text == "hello world"
     fake_client.messages.create.assert_called_once_with(
         model=client.settings.MODEL_NAME,
         max_tokens=64,
         system="system",
         messages=[{"role": "user", "content": "user"}],
     )
+
+
+def test_call_model_surfaces_token_usage():
+    # The whole point of the ModelResponse wrapper: usage reaches the caller
+    # instead of being dropped with the SDK response object.
+    fake_client = SimpleNamespace(messages=SimpleNamespace(create=Mock()))
+    fake_client.messages.create.return_value = _response(
+        "ok", input_tokens=2480, output_tokens=317
+    )
+
+    with patch.object(client, "get_client", return_value=fake_client):
+        result = client.call_model("system", "user")
+
+    assert result.input_tokens == 2480
+    assert result.output_tokens == 317
+    # The configured alias, not whatever snapshot id the API echoes — the
+    # price table is keyed on the alias.
+    assert result.model_name == client.settings.MODEL_NAME
 
 
 def test_call_model_raises_when_response_has_no_text():
@@ -58,7 +79,7 @@ def test_call_model_retries_on_transient_error(monkeypatch):
     with patch.object(client, "get_client", return_value=fake_client):
         result = client.call_model("system", "user")
 
-    assert result == "recovered"
+    assert result.text == "recovered"
     assert fake_client.messages.create.call_count == 2
 
 

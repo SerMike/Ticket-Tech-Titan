@@ -14,6 +14,11 @@ const CONFIG = {
   defaultTheme: 'system',        // 'system' | 'light' | 'dark'
   confidenceAsPercent: false,    // table confidence as 92% instead of 0.92
   showRawAggregates: true,
+  // Seeds for the cost view's comparison inputs; the analyst can override
+  // both live. 1.2 min/ticket comes from the README's real numbers: 3-4 hrs
+  // of triage saved per day over ~150 tickets/day.
+  analystHourlyRate: 35,
+  minutesSavedPerTicket: 1.2,
 };
 
 const state = {
@@ -27,6 +32,12 @@ const state = {
   // ai_summary/ai_reasoning aren't in the queue join — fetched per ticket
   // from /api/tickets/{id}/evaluation and cached by id.
   evaluations: {},
+  // Cost is the one aggregate computed server-side — the price table lives
+  // in config/settings.py. costRangeKey doubles as cache key and in-flight
+  // marker, the same trick evaluations[id] = null uses.
+  costs: null, costsError: '', costRangeKey: null,
+  analystRate: CONFIG.analystHourlyRate,
+  minutesSaved: CONFIG.minutesSavedPerTicket,
 };
 
 function setState(patch) {
@@ -71,6 +82,54 @@ function tagHtml(cat) {
   return '<span class="tag" style="' + tagStyle(cat) + '">' + esc(label) + '</span>';
 }
 
+// --- Chart primitives -------------------------------------------------------
+// Shared by the analytics and cost views. Hoisted to module scope rather than
+// duplicated; barRow and panel were local to renderAnalytics until the cost
+// view needed them, and they close over nothing but esc/CORNERS.
+
+function barRow(cols, label, fillPct, fill, count, mono) {
+  return '<div style="display: grid; grid-template-columns: ' + cols + '; gap: 10px; align-items: center;">'
+    + '<div style="font-size: ' + (mono ? '11px; font-family: ui-monospace, monospace;' : '12px;') + ' text-align: right; color: color-mix(in srgb, var(--color-text) 75%, transparent);">' + esc(label) + '</div>'
+    + '<div style="height: 18px; background: var(--color-neutral-200);"><div style="height: 100%; width: ' + fillPct + '%; background: ' + fill + ';"></div></div>'
+    + '<div style="font-size: 12px;">' + esc(count) + '</div>'
+    + '</div>';
+}
+
+function panel(title, body, titleMargin) {
+  return '<div class="blueprint" style="padding: var(--space-4);">' + CORNERS
+    + '<h5 style="margin-bottom: ' + (titleMargin || 'var(--space-4)') + ';">' + title + '</h5>' + body + '</div>';
+}
+
+// Polyline time series over [label, value] pairs, same geometry as the
+// analytics volume chart. formatMax renders the y-axis top label.
+function lineChartSvg(entries, formatMax) {
+  const X0 = 36, X1 = 592, Y0 = 190, Y1 = 14;
+  const max = Math.max(...entries.map((e) => e[1]), 0) || 1;
+  const pts = entries.map(([, v], i) => ({
+    x: (entries.length > 1 ? X0 + (X1 - X0) * i / (entries.length - 1) : (X0 + X1) / 2).toFixed(1),
+    y: (Y0 - (Y0 - Y1) * v / max).toFixed(1),
+  }));
+  return '<svg viewBox="0 0 600 220" style="width: 100%; display: block;">'
+    + '<line x1="36" y1="190" x2="592" y2="190" stroke="var(--color-divider)" stroke-width="1"></line>'
+    + '<line x1="36" y1="10" x2="36" y2="190" stroke="var(--color-divider)" stroke-width="1"></line>'
+    + '<polyline points="' + pts.map((p) => p.x + ',' + p.y).join(' ') + '" fill="none" stroke="var(--color-accent)" stroke-width="1.5"></polyline>'
+    + pts.map((p) => '<circle cx="' + p.x + '" cy="' + p.y + '" r="2.5" fill="var(--color-accent)"></circle>').join('')
+    + '<text x="36" y="208" font-size="10" fill="currentColor" opacity="0.55">' + esc(entries.length ? entries[0][0] : '') + '</text>'
+    + '<text x="592" y="208" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">' + esc(entries.length ? entries[entries.length - 1][0] : '') + '</text>'
+    + '<text x="30" y="14" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">' + esc(formatMax(max)) + '</text>'
+    + '<text x="30" y="193" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">0</text>'
+    + '</svg>';
+}
+
+// null means "we can't price this" — render it as an em dash, never $0.00.
+function usd(v, places) {
+  return v == null ? '—' : '$' + v.toFixed(places == null ? 2 : places);
+}
+
+function tokens(n) {
+  return Number(n || 0).toLocaleString();
+}
+
 let toastTimer = null;
 function toast(text) {
   clearTimeout(toastTimer);
@@ -104,6 +163,22 @@ async function ensureEvaluation(ticketId) {
   }
 }
 
+async function ensureCosts() {
+  const key = state.dateFrom + '|' + state.dateTo;
+  if (state.costRangeKey === key) return;
+  state.costRangeKey = key;  // direct mutation: guards the render→fetch loop
+  const qs = new URLSearchParams();
+  if (state.dateFrom) qs.set('date_from', state.dateFrom);
+  if (state.dateTo) qs.set('date_to', state.dateTo);
+  try {
+    const res = await fetch('/api/costs?' + qs.toString());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    setState({ costs: await res.json(), costsError: '' });
+  } catch (err) {
+    setState({ costs: null, costsError: err.message });
+  }
+}
+
 async function loadInitial() {
   const tickets = await fetchTickets();
   const dates = tickets.map((t) => t.created_at.slice(0, 10)).sort();
@@ -122,6 +197,7 @@ async function refreshData() {
     setState({
       tickets,
       evaluations: {},
+      costRangeKey: null,  // invalidate so the cost view re-pulls
       selectedId: stillThere ? state.selectedId : (tickets[0] ? tickets[0].ticket_id : null),
     });
     toast('Data refreshed from the latest DB state.');
@@ -182,7 +258,7 @@ function analyticsSet() {
 // ---------------------------------------------------------------------------
 
 function renderNav() {
-  const links = ['Dashboard', 'Queue', 'Analytics'].map((label) => {
+  const links = ['Dashboard', 'Queue', 'Analytics', 'Costs'].map((label) => {
     const view = label.toLowerCase();
     const active = state.view === view;
     const style = 'font-family: var(--font-heading); font-weight: 600; font-size: 15px; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none;'
@@ -397,13 +473,6 @@ function renderAnalytics() {
   const catEntries = CAT_ORDER.filter((c) => catCounts[c]).map((c) => [c, catCounts[c]]).sort((a, b) => b[1] - a[1]);
   const catMax = Math.max(1, ...catEntries.map((e) => e[1]));
 
-  const barRow = (cols, label, fillPct, fill, count, mono) =>
-    '<div style="display: grid; grid-template-columns: ' + cols + '; gap: 10px; align-items: center;">'
-    + '<div style="font-size: ' + (mono ? '11px; font-family: ui-monospace, monospace;' : '12px;') + ' text-align: right; color: color-mix(in srgb, var(--color-text) 75%, transparent);">' + esc(label) + '</div>'
-    + '<div style="height: 18px; background: var(--color-neutral-200);"><div style="height: 100%; width: ' + fillPct + '%; background: ' + fill + ';"></div></div>'
-    + '<div style="font-size: 12px;">' + esc(count) + '</div>'
-    + '</div>';
-
   const catBars = catEntries.map(([label, count]) =>
     barRow('150px 1fr 30px', label, Math.round(100 * count / catMax), CAT_FILL[label], String(count))).join('');
 
@@ -465,10 +534,6 @@ function renderAnalytics() {
     aggRows = [['count', String(n)], ['mean', mean.toFixed(3)], ['std', std.toFixed(3)], ['min', (sorted[0] || 0).toFixed(2)], ['25%', q(0.25).toFixed(2)], ['50%', q(0.5).toFixed(2)], ['75%', q(0.75).toFixed(2)], ['max', (sorted[n - 1] || 0).toFixed(2)]].map(([a, b]) => ({ a, b }));
   }
 
-  const panel = (title, body, titleMargin) =>
-    '<div class="blueprint" style="padding: var(--space-4);">' + CORNERS
-    + '<h5 style="margin-bottom: ' + (titleMargin || 'var(--space-4)') + ';">' + title + '</h5>' + body + '</div>';
-
   return '<section>'
     + '<h6 style="color: var(--color-accent);">Signals</h6>'
     + '<h1 style="margin-bottom: var(--space-6);">Analytics</h1>'
@@ -507,6 +572,121 @@ function renderAnalytics() {
     + '</section>';
 }
 
+function renderCosts() {
+  const s = state;
+  const dateRail = '<div style="display: flex; gap: var(--space-4); align-items: end; margin-bottom: var(--space-6);">'
+    + '<div class="field"><label>From</label><input type="date" class="input" value="' + esc(s.dateFrom) + '" data-action="date-from" style="width: 170px;"></div>'
+    + '<div class="field"><label>To</label><input type="date" class="input" value="' + esc(s.dateTo) + '" data-action="date-to" style="width: 170px;"></div>'
+    + '</div>';
+  const head = '<h6 style="color: var(--color-accent);">Spend</h6>'
+    + '<h1 style="margin-bottom: var(--space-6);">Costs</h1>' + dateRail;
+
+  if (s.costsError) {
+    return '<section>' + head
+      + panel('Cost breakdown', '<p class="text-muted" style="margin: 0;">Cost data unavailable: ' + esc(s.costsError) + '</p>')
+      + '</section>';
+  }
+  if (!s.costs) {
+    return '<section>' + head
+      + panel('Cost breakdown', '<p class="text-muted" style="margin: 0;">Loading cost data…</p>')
+      + '</section>';
+  }
+
+  const t = s.costs.totals;
+  const priced = t.tracked - t.unpriced;
+
+  // Analyst comparison. Only priced evaluations count on both sides, so the
+  // ratio compares like with like.
+  const hoursSaved = priced * s.minutesSaved / 60;
+  const analystCost = hoursSaved * s.analystRate;
+  const netSaving = analystCost - t.cost_usd;
+  const multiple = t.cost_usd > 0 ? analystCost / t.cost_usd : null;
+
+  const cards = [
+    { kicker: 'Total LLM spend', value: usd(t.cost_usd, 4),
+      meta: priced + ' of ' + t.evaluations + ' evaluations priced' },
+    { kicker: 'Cost per ticket', value: usd(t.avg_cost_per_ticket_usd, 4),
+      meta: tokens(t.input_tokens) + ' in / ' + tokens(t.output_tokens) + ' out tokens' },
+    { kicker: 'Analyst equivalent', value: usd(analystCost),
+      meta: hoursSaved.toFixed(1) + ' h of triage displaced' },
+    { kicker: 'Net saving', value: usd(netSaving),
+      meta: multiple ? Math.round(multiple) + '× return on API spend' : 'No priced spend yet' },
+  ];
+  const cardsHtml = '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-6); margin-bottom: var(--space-6);">'
+    + cards.map((c) =>
+      '<div class="card blueprint" style="padding: var(--space-4); gap: var(--space-2);">' + CORNERS
+      + '<div class="card-kicker">' + esc(c.kicker) + '</div>'
+      + '<div style="font-family: var(--font-heading); font-weight: 600; font-size: 40px; line-height: 1;">' + esc(c.value) + '</div>'
+      + '<div class="card-meta">' + esc(c.meta) + '</div>'
+      + '</div>').join('')
+    + '</div>';
+
+  // Untracked evaluations are excluded from every figure above rather than
+  // counted as $0.00 — say so, or the numbers look wrong.
+  const untrackedNote = t.untracked
+    ? '<div class="blueprint" style="padding: var(--space-3) var(--space-4); margin-bottom: var(--space-6); border-left: 3px solid var(--status-admit);">' + CORNERS
+      + '<span style="font-size: 13px;">' + esc(t.untracked) + ' evaluation' + (t.untracked === 1 ? '' : 's')
+      + ' ran before token capture existed, so they are excluded from the figures above rather than counted as $0.00. '
+      + 'Re-run the pipeline with <code style="font-family: ui-monospace, monospace; font-size: 12px;">--force</code> to price them.</span>'
+      + '</div>'
+    : '';
+
+  const days = s.costs.by_day;
+  const cumulative = panel('Cumulative spend',
+    lineChartSvg(days.map((d) => [d.date, d.cumulative_cost_usd]), (m) => usd(m, 2)),
+    'var(--space-2)');
+
+  // Days whose evaluations were all untracked have no spend to chart; listing
+  // them as $0.0000 rows crowds out the days that did cost something.
+  const topDays = days.filter((d) => d.cost_usd > 0)
+    .sort((a, b) => b.cost_usd - a.cost_usd).slice(0, 8);
+  const dayMax = Math.max(...topDays.map((d) => d.cost_usd), 0) || 1;
+  const perDay = panel('Cost per day',
+    topDays.length
+      ? '<div style="display: flex; flex-direction: column; gap: 9px;">'
+        + topDays.map((d) => barRow('80px 1fr 58px', d.date,
+          Math.round(100 * d.cost_usd / dayMax), 'var(--color-accent-500)', usd(d.cost_usd, 4), true)).join('')
+        + '</div>'
+      : '<p class="text-muted" style="margin: 0;">No priced evaluations in this range.</p>');
+
+  const modelMax = Math.max(...s.costs.by_model.map((m) => m.cost_usd || 0), 0) || 1;
+  const modelBars = s.costs.by_model.map((m) => {
+    const label = m.model_name || 'untracked';
+    if (m.cost_usd == null) {
+      // Tokens without a price, or no tokens at all. Either way there is no
+      // dollar figure to draw — a dashed empty track says that.
+      return '<div style="display: grid; grid-template-columns: 130px 1fr 58px; gap: 10px; align-items: center;">'
+        + '<div style="font-size: 11px; font-family: ui-monospace, monospace; text-align: right; color: color-mix(in srgb, var(--color-text) 45%, transparent);">' + esc(label) + '</div>'
+        + '<div style="height: 18px; border: 1px dashed var(--color-divider);"></div>'
+        + '<div style="font-size: 12px;" class="text-muted">' + esc(m.model_name ? 'unknown' : '—') + '</div>'
+        + '</div>';
+    }
+    return barRow('130px 1fr 58px', label, Math.round(100 * m.cost_usd / modelMax),
+      'var(--color-accent-500)', usd(m.cost_usd, 4), true);
+  }).join('');
+  const byModel = panel('Spend by model',
+    '<div style="display: flex; flex-direction: column; gap: 10px;">' + modelBars + '</div>'
+    + '<p class="text-muted" style="font-size: 12px; margin: var(--space-4) 0 0;">A model absent from the price table shows its tokens but no dollar figure.</p>');
+
+  const roiMax = Math.max(analystCost, t.cost_usd, 0.01);
+  const comparison = panel('Money spent vs. analyst time saved',
+    '<div style="display: flex; gap: var(--space-3); margin-bottom: var(--space-4);">'
+    + '<div class="field"><label>Analyst rate ($/h)</label><input type="number" min="0" step="1" class="input" value="' + esc(s.analystRate) + '" data-action="analyst-rate" style="width: 110px;"></div>'
+    + '<div class="field"><label>Minutes saved / ticket</label><input type="number" min="0" step="0.1" class="input" value="' + esc(s.minutesSaved) + '" data-action="minutes-saved" style="width: 130px;"></div>'
+    + '</div>'
+    + '<div style="display: flex; flex-direction: column; gap: 10px;">'
+    + barRow('96px 1fr 62px', 'LLM spend', Math.max(0.5, 100 * t.cost_usd / roiMax), 'var(--color-accent-500)', usd(t.cost_usd))
+    + barRow('96px 1fr 62px', 'Analyst time', Math.round(100 * analystCost / roiMax), 'var(--status-admit)', usd(analystCost))
+    + '</div>'
+    + '<p class="text-muted" style="font-size: 12px; margin: var(--space-4) 0 0;">Assumes each priced evaluation displaces '
+    + esc(s.minutesSaved) + ' minutes of manual triage. Failed and retried API calls burn tokens that are never recorded, so real spend is at or above the figure shown.</p>');
+
+  return '<section>' + head + cardsHtml + untrackedNote
+    + '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-bottom: var(--space-6);">'
+    + cumulative + perDay + byModel + comparison
+    + '</div></section>';
+}
+
 // ---------------------------------------------------------------------------
 // Render
 // ---------------------------------------------------------------------------
@@ -520,6 +700,7 @@ function render() {
   if (state.view === 'dashboard') viewHtml = renderDashboard();
   else if (state.view === 'queue') viewHtml = renderQueue();
   else if (state.view === 'analytics') viewHtml = renderAnalytics();
+  else if (state.view === 'costs') viewHtml = renderCosts();
 
   const toastHtml = state.toastVisible
     ? '<div class="blueprint elev-md" style="position: fixed; right: 24px; bottom: 24px; padding: var(--space-3) var(--space-4); background: var(--color-bg); font-size: 13px; z-index: 50;">' + CORNERS + esc(state.toastText) + '</div>'
@@ -536,6 +717,7 @@ function render() {
 
   const sel = state.tickets.find((t) => t.ticket_id === state.selectedId);
   if (sel && sel.ai_category) ensureEvaluation(sel.ticket_id);
+  if (state.view === 'costs') ensureCosts();
 }
 
 // ---------------------------------------------------------------------------
@@ -572,6 +754,10 @@ document.getElementById('app').addEventListener('change', (e) => {
   else if (action === 'date-from') setState({ dateFrom: el.value });
   else if (action === 'date-to') setState({ dateTo: el.value });
   else if (action === 'agg-tab') setState({ aggTab: el.dataset.label });
+  // On `change`, not `input`: render() rebuilds #app wholesale, so reacting
+  // per keystroke would destroy the field mid-edit.
+  else if (action === 'analyst-rate') setState({ analystRate: Math.max(0, parseFloat(el.value) || 0) });
+  else if (action === 'minutes-saved') setState({ minutesSaved: Math.max(0, parseFloat(el.value) || 0) });
 });
 
 // ---------------------------------------------------------------------------

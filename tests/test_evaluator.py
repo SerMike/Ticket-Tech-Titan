@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+from evaluation.client import ModelResponse
 from evaluation.evaluator import EvaluationError, _parse_json, _validate, evaluate_ticket
 
 
@@ -59,13 +60,25 @@ def test_validate_rejects_boolean_confidence_score():
         _validate(data)
 
 
+def _fake_call(raw, input_tokens=1200, output_tokens=340):
+    """Stand in for call_model, which returns a ModelResponse rather than
+    a bare string now that token usage is threaded through."""
+    response = ModelResponse(
+        text=raw,
+        model_name="claude-sonnet-4-6",
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+    )
+    return lambda **kwargs: response
+
+
 def test_evaluate_ticket_returns_clean_schema(monkeypatch):
     raw = (
         '{"ai_summary":"Summary","ai_category":"Needs Review",'
         '"admitted_cheating":false,"admitted_exploit":false,'
         '"confidence_score":0.5,"ai_reasoning":"Reasoning"}'
     )
-    monkeypatch.setattr("evaluation.evaluator.call_model", lambda **kwargs: raw)
+    monkeypatch.setattr("evaluation.evaluator.call_model", _fake_call(raw))
 
     result = evaluate_ticket(TICKET, ban_record=None)
 
@@ -78,11 +91,29 @@ def test_evaluate_ticket_returns_clean_schema(monkeypatch):
         "admitted_exploit": False,
         "confidence_score": 0.5,
         "ai_reasoning": "Reasoning",
+        "input_tokens": 1200,
+        "output_tokens": 340,
+        "model_name": "claude-sonnet-4-6",
     }
 
 
+def test_evaluate_ticket_passes_through_missing_token_usage(monkeypatch):
+    # A provider that doesn't report usage must yield None, not 0 — the cost
+    # layer distinguishes "untracked" from "free".
+    raw = json.dumps(VALID_EVALUATION)
+    monkeypatch.setattr(
+        "evaluation.evaluator.call_model",
+        _fake_call(raw, input_tokens=None, output_tokens=None),
+    )
+
+    result = evaluate_ticket(TICKET, ban_record=None)
+
+    assert result["input_tokens"] is None
+    assert result["output_tokens"] is None
+
+
 def test_evaluate_ticket_raises_on_empty_response(monkeypatch):
-    monkeypatch.setattr("evaluation.evaluator.call_model", lambda **kwargs: "")
+    monkeypatch.setattr("evaluation.evaluator.call_model", _fake_call(""))
 
     with pytest.raises(EvaluationError, match="not valid JSON"):
         evaluate_ticket(TICKET, ban_record=None)
@@ -91,7 +122,7 @@ def test_evaluate_ticket_raises_on_empty_response(monkeypatch):
 def test_evaluate_ticket_raises_on_valid_json_but_missing_fields(monkeypatch):
     payload = {k: v for k, v in VALID_EVALUATION.items() if k != "confidence_score"}
     monkeypatch.setattr(
-        "evaluation.evaluator.call_model", lambda **kwargs: json.dumps(payload)
+        "evaluation.evaluator.call_model", _fake_call(json.dumps(payload))
     )
 
     with pytest.raises(EvaluationError, match="confidence_score"):
@@ -101,7 +132,7 @@ def test_evaluate_ticket_raises_on_valid_json_but_missing_fields(monkeypatch):
 def test_evaluate_ticket_raises_on_confidence_score_out_of_range(monkeypatch):
     payload = VALID_EVALUATION | {"confidence_score": 1.5}
     monkeypatch.setattr(
-        "evaluation.evaluator.call_model", lambda **kwargs: json.dumps(payload)
+        "evaluation.evaluator.call_model", _fake_call(json.dumps(payload))
     )
 
     with pytest.raises(EvaluationError, match="out of range"):
