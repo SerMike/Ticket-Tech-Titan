@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/industry-1585506e-d2e7-4830-b3c3-659008e537b4/styles.css">
+  <script src="_ds/industry-1585506e-d2e7-4830-b3c3-659008e537b4/_ds_bundle.js"></script>
+  <style>
+    html { background: var(--color-bg); }
+    body { transition: background 0.2s, color 0.2s; }
+    :root:not([data-theme="dark"]) {
+      --color-bg: oklch(0.955 0.012 85);
+      --color-surface: oklch(0.93 0.014 85);
+      --color-divider: color-mix(in srgb, #1d1f20 18%, transparent);
+    }
+    a { color: var(--color-accent); } a:hover { color: var(--color-accent-600); }
+    :root[data-theme="dark"] {
+      --color-bg: oklch(0.21 0.012 85);
+      --color-surface: oklch(0.26 0.014 85);
+      --color-text: #e6e7e9;
+      --color-accent: #7ea3c9;
+      --color-accent-2: #8ba7c4;
+      --color-divider: color-mix(in srgb, #e6e7e9 18%, transparent);
+      --color-neutral-100: #2b2b2d; --color-neutral-200: #424244; --color-neutral-300: #5d5d60;
+      --color-neutral-400: #7a7a7d; --color-neutral-500: #98989b; --color-neutral-600: #b7b7ba;
+      --color-neutral-700: #d4d4d7; --color-neutral-800: #e7e7ea; --color-neutral-900: #f5f5f8;
+      --color-accent-100: #1d2d3d; --color-accent-200: #2c455d; --color-accent-300: #416180;
+      --color-accent-400: #597ea3; --color-accent-500: #749dc4; --color-accent-600: #94bce3;
+      --color-accent-700: #b5d9fd; --color-accent-800: #d6ebff; --color-accent-900: #eef6ff;
+      --color-accent-2-100: #1f2d3a; --color-accent-2-200: #314457; --color-accent-2-300: #486077;
+      --color-accent-2-400: #627d98; --color-accent-2-500: #7e9cb8; --color-accent-2-600: #9ebbd8;
+      --color-accent-2-700: #bdd8f2; --color-accent-2-800: #d6ebff; --color-accent-2-900: #eef6ff;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+      --shadow-md: 0 3px 10px rgba(0,0,0,0.55);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.65);
+    }
+    /* Semantic status hues — derived in OKLCH on the accent's own lightness/chroma
+       scale so they sit in the same visual register as the steel ramp. */
+    :root {
+      --status-deny: oklch(0.56 0.13 25);      --status-deny-bg: oklch(0.92 0.04 25);   --status-deny-fg: oklch(0.38 0.12 25);
+      --status-admit: oklch(0.62 0.11 65);     --status-admit-bg: oklch(0.93 0.045 70); --status-admit-fg: oklch(0.4 0.09 60);
+      --status-review: oklch(0.72 0.11 92);    --status-review-bg: oklch(0.94 0.06 95); --status-review-fg: oklch(0.44 0.08 85);
+      --status-legit: oklch(0.58 0.1 155);     --status-legit-bg: oklch(0.92 0.045 155); --status-legit-fg: oklch(0.37 0.08 155);
+      --status-bot: var(--color-neutral-500);  --status-bot-bg: var(--color-neutral-200); --status-bot-fg: var(--color-neutral-800);
+      --status-exploit: oklch(0.56 0.11 300);
+    }
+    :root[data-theme="dark"] {
+      --status-deny: oklch(0.66 0.13 25);      --status-deny-bg: oklch(0.32 0.07 25);   --status-deny-fg: oklch(0.86 0.05 25);
+      --status-admit: oklch(0.7 0.11 65);      --status-admit-bg: oklch(0.33 0.06 65);  --status-admit-fg: oklch(0.88 0.05 70);
+      --status-review: oklch(0.76 0.11 92);    --status-review-bg: oklch(0.35 0.06 92); --status-review-fg: oklch(0.89 0.06 95);
+      --status-legit: oklch(0.68 0.1 155);     --status-legit-bg: oklch(0.32 0.05 155); --status-legit-fg: oklch(0.87 0.05 155);
+      --status-exploit: oklch(0.68 0.11 300);
+    }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; background: var(--color-bg); color: var(--color-text); font-family: var(--font-body);">
+
+  <div style="border-bottom: 1px solid var(--color-divider);">
+    <nav class="nav" style="max-width: 1280px; margin: 0 auto; padding: var(--space-3) var(--space-6);">
+      <div class="nav-brand" style="display: flex; align-items: baseline; gap: 10px; margin-right: auto;">
+        <span style="letter-spacing: 0.04em; text-transform: uppercase;">Ticket Tech Titan</span>
+        <span class="text-muted" style="font-family: var(--font-body); font-weight: 400; font-size: 12px;">AI-powered ban appeal review</span>
+      </div>
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="3">
+        <a href="#" onClick="{{ item.onClick }}" aria-current="{{ item.current }}" style="{{ item.style }}">{{ item.label }}</a>
+      </sc-for>
+      <button class="btn btn-secondary" onClick="{{ onRefresh }}" style="gap: 8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
+        Refresh data
+      </button>
+      <button class="btn btn-secondary btn-icon" onClick="{{ onToggleTheme }}" title="Toggle light/dark" aria-label="Toggle light/dark theme">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+        </sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+        </sc-if>
+      </button>
+    </nav>
+  </div>
+
+  <main style="max-width: 1280px; margin: 0 auto; padding: var(--space-8) var(--space-6) 80px;">
+
+    <sc-if value="{{ isDashView }}" hint-placeholder-val="{{ true }}">
+      <section data-screen-label="Dashboard">
+        <h6 style="color: var(--color-accent);">Overview</h6>
+        <h1 style="margin-bottom: var(--space-2);">Dashboard</h1>
+        <p class="text-muted" style="max-width: 560px;">Overview of the ticket queue and recent AI activity. Use the navigation above to open the queue or the analytics page.</p>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8);">
+          <sc-for list="{{ summaryCards }}" as="card" hint-placeholder-count="3">
+            <div class="card blueprint" style="padding: var(--space-6); gap: var(--space-3);">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div class="card-kicker">{{ card.kicker }}</div>
+              <div style="font-family: var(--font-heading); font-weight: 600; font-size: 56px; line-height: 1;">{{ card.value }}</div>
+              <div class="card-meta">{{ card.meta }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: var(--space-3); margin-top: var(--space-8);">
+          <button class="btn btn-primary blueprint" onClick="{{ goQueue }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Open the queue</button>
+          <button class="btn btn-secondary" onClick="{{ goAnalytics }}">View analytics</button>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isQueueView }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Ticket queue">
+        <h6 style="color: var(--color-accent);">Workflow</h6>
+        <h1 style="margin-bottom: var(--space-6);">Ticket queue</h1>
+        <div style="display: grid; grid-template-columns: 232px 1fr; gap: var(--space-6); align-items: start;">
+
+          <aside class="blueprint" style="padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-4); position: sticky; top: 20px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h6 style="margin: 0;">Filters</h6>
+            <div>
+              <div style="font-size: 12px; margin-bottom: 6px; color: color-mix(in srgb, var(--color-text) 70%, transparent);">AI category</div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <sc-for list="{{ catFilters }}" as="f" hint-placeholder-count="6">
+                  <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                    <input type="checkbox" checked="{{ f.checked }}" onChange="{{ f.toggle }}" style="accent-color: var(--color-accent); width: 14px; height: 14px; margin: 0;">
+                    <span>{{ f.label }}</span>
+                  </label>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 12px; margin-bottom: 6px; color: color-mix(in srgb, var(--color-text) 70%, transparent);">Status</div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <sc-for list="{{ statusFilters }}" as="f" hint-placeholder-count="3">
+                  <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                    <input type="checkbox" checked="{{ f.checked }}" onChange="{{ f.toggle }}" style="accent-color: var(--color-accent); width: 14px; height: 14px; margin: 0;">
+                    <span>{{ f.label }}</span>
+                  </label>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 12px; margin-bottom: 6px; color: color-mix(in srgb, var(--color-text) 70%, transparent);">Confidence score · {{ confRangeLabel }}</div>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <input type="range" min="0" max="1" step="0.05" value="{{ confMin }}" onChange="{{ onConfMin }}" style="accent-color: var(--color-accent); width: 100%;">
+                <input type="range" min="0" max="1" step="0.05" value="{{ confMax }}" onChange="{{ onConfMax }}" style="accent-color: var(--color-accent); width: 100%;">
+              </div>
+            </div>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" checked="{{ admittedOnly }}" onChange="{{ onAdmittedOnly }}" style="accent-color: var(--color-accent); width: 14px; height: 14px; margin: 0;">
+              <span>Admitted cheating only</span>
+            </label>
+          </aside>
+
+          <div style="display: flex; flex-direction: column; gap: var(--space-6); min-width: 0;">
+            <div>
+              <div class="text-muted" style="font-size: 12px; margin-bottom: var(--space-2);">{{ queueCaption }}</div>
+              <div class="blueprint" style="max-height: 480px; overflow: auto;">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <table class="table" style="min-width: 900px;">
+                  <thead>
+                    <tr>
+                      <th style="position: sticky; top: 0; background: var(--color-bg);">Ticket ID</th>
+                      <th style="position: sticky; top: 0; background: var(--color-bg);">Player</th>
+                      <th style="position: sticky; top: 0; background: var(--color-bg);">User category</th>
+                      <th style="position: sticky; top: 0; background: var(--color-bg);">AI category</th>
+                      <th style="position: sticky; top: 0; background: var(--color-bg);">Confidence</th>
+                      <th style="position: sticky; top: 0; background: var(--color-bg); text-align: center;">Adm. cheat</th>
+                      <th style="position: sticky; top: 0; background: var(--color-bg); text-align: center;">Adm. exploit</th>
+                      <th style="position: sticky; top: 0; background: var(--color-bg);">Status</th>
+                      <th style="position: sticky; top: 0; background: var(--color-bg);">Submitted</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ queueRows }}" as="row" hint-placeholder-count="8">
+                      <tr onClick="{{ row.select }}" style="{{ row.rowStyle }}">
+                        <td style="font-size: 12px; font-family: ui-monospace, monospace;">{{ row.id }}</td>
+                        <td>{{ row.player }}</td>
+                        <td style="font-size: 13px;">{{ row.userCat }}</td>
+                        <td><span class="tag" style="{{ row.tagStyle }}">{{ row.aiCat }}</span></td>
+                        <td>
+                          <sc-if value="{{ row.hasConf }}" hint-placeholder-val="{{ true }}">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                              <div style="width: 72px; height: 5px; background: var(--color-neutral-200); flex: none;"><div style="height: 100%; width: {{ row.confPct }}%; background: var(--color-accent);"></div></div>
+                              <span style="font-size: 12px;">{{ row.confLabel }}</span>
+                            </div>
+                          </sc-if>
+                        </td>
+                        <td style="text-align: center; font-size: 15px; color: {{ row.admCheatColor }};">{{ row.admCheat }}</td>
+                        <td style="text-align: center; font-size: 15px; color: {{ row.admExploitColor }};">{{ row.admExploit }}</td>
+                        <td style="font-size: 13px;">{{ row.status }}</td>
+                        <td style="font-size: 12px; white-space: nowrap;">{{ row.submitted }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+              <sc-if value="{{ queueEmpty }}" hint-placeholder-val="{{ false }}">
+                <p class="text-muted" style="margin-top: var(--space-3);">No tickets match the current filters.</p>
+              </sc-if>
+            </div>
+
+            <sc-if value="{{ hasSelected }}" hint-placeholder-val="{{ false }}">
+              <div class="blueprint" style="padding: var(--space-6);" data-screen-label="Ticket detail">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); border-bottom: 1px solid var(--color-divider); padding-bottom: var(--space-3); margin-bottom: var(--space-4);">
+                  <h3 style="margin: 0;">Ticket {{ dTicketId }}</h3>
+                  <span class="tag" style="{{ dTagStyle }}">{{ dAiCat }}</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8);">
+                  <div>
+                    <h6 style="color: var(--color-accent);">Appeal</h6>
+                    <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; margin-bottom: var(--space-3);">
+                      <span class="text-muted">Player</span><strong>{{ dPlayer }}</strong>
+                      <span class="text-muted">User ID</span><span style="font-family: ui-monospace, monospace; font-size: 12px;">{{ dUserId }}</span>
+                      <span class="text-muted">Submitted</span><span>{{ dSubmitted }}</span>
+                      <span class="text-muted">User category</span><span>{{ dUserCat }}</span>
+                    </div>
+                    <h4 style="margin-bottom: var(--space-2);">{{ dTitle }}</h4>
+                    <p style="font-size: 14px; text-wrap: pretty;">{{ dBody }}</p>
+                    <div style="margin-top: var(--space-4);">
+                      <div style="font-size: 12px; margin-bottom: 5px; color: color-mix(in srgb, var(--color-text) 70%, transparent);">Status</div>
+                      <select class="input" value="{{ dStatus }}" onChange="{{ onStatusChange }}" style="max-width: 200px;">
+                        <option value="open">open</option>
+                        <option value="pending">pending</option>
+                        <option value="closed">closed</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <h6 style="color: var(--color-accent);">Ban record</h6>
+                    <sc-if value="{{ dHasBan }}" hint-placeholder-val="{{ true }}">
+                      <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px;">
+                        <span class="text-muted">Reason</span><span>{{ dBanReason }}</span>
+                        <span class="text-muted">Detection</span><span style="font-family: ui-monospace, monospace; font-size: 12px;">{{ dDetection }}</span>
+                        <span class="text-muted">Duration</span><span>{{ dBanDuration }}</span>
+                        <span class="text-muted">Ban date</span><span>{{ dBanDate }}</span>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ dNoBan }}" hint-placeholder-val="{{ false }}">
+                      <div class="blueprint" style="padding: var(--space-3); font-size: 13px; border-color: var(--color-accent);">
+                        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                        <strong style="color: var(--color-accent-700);">No ban record</strong> — potential wrongful ban.
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+                <div style="border-top: 1px solid var(--color-divider); margin-top: var(--space-6); padding-top: var(--space-4);">
+                  <h6 style="color: var(--color-accent);">AI evaluation</h6>
+                  <sc-if value="{{ dEvaluated }}" hint-placeholder-val="{{ true }}">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: var(--space-6); margin-bottom: var(--space-4);">
+                      <div>
+                        <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">Category</div>
+                        <span class="tag" style="{{ dTagStyle }}">{{ dAiCat }}</span>
+                      </div>
+                      <div>
+                        <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">Confidence · {{ dConfLabel }}</div>
+                        <div style="width: 100%; max-width: 180px; height: 6px; background: var(--color-neutral-200); margin-top: 8px;"><div style="height: 100%; width: {{ dConfPct }}%; background: var(--color-accent);"></div></div>
+                      </div>
+                      <div style="font-size: 13px; display: flex; flex-direction: column; gap: 3px;">
+                        <div><span class="text-muted">Admitted cheating:</span> <strong>{{ dAdmCheat }}</strong></div>
+                        <div><span class="text-muted">Admitted exploit:</span> <strong>{{ dAdmExploit }}</strong></div>
+                      </div>
+                    </div>
+                    <div class="text-muted" style="font-size: 12px; margin-bottom: 5px;">Summary</div>
+                    <div class="blueprint" style="padding: var(--space-3); font-size: 14px;">
+                      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                      {{ dSummary }}
+                    </div>
+                    <button class="btn btn-ghost" onClick="{{ onToggleReasoning }}" style="margin-top: var(--space-3);">{{ reasoningToggleLabel }}</button>
+                    <sc-if value="{{ showReasoning }}" hint-placeholder-val="{{ false }}">
+                      <p style="font-size: 13px; margin-top: var(--space-2); text-wrap: pretty;" class="text-muted">{{ dReasoning }}</p>
+                    </sc-if>
+                  </sc-if>
+                  <sc-if value="{{ dNotEvaluated }}" hint-placeholder-val="{{ false }}">
+                    <p class="text-muted" style="font-size: 14px;">Not yet evaluated. Run the evaluation pipeline to populate.</p>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isAnalyticsView }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Analytics">
+        <h6 style="color: var(--color-accent);">Signals</h6>
+        <h1 style="margin-bottom: var(--space-6);">Analytics</h1>
+
+        <div style="display: flex; gap: var(--space-4); align-items: end; margin-bottom: var(--space-6);">
+          <div class="field"><label>From</label><input type="date" class="input" value="{{ dateFrom }}" onChange="{{ onDateFrom }}" style="width: 170px;"></div>
+          <div class="field"><label>To</label><input type="date" class="input" value="{{ dateTo }}" onChange="{{ onDateTo }}" style="width: 170px;"></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-6); margin-bottom: var(--space-8);">
+          <sc-for list="{{ aMetrics }}" as="m" hint-placeholder-count="4">
+            <div class="card blueprint" style="padding: var(--space-4); gap: var(--space-2);">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div class="card-kicker">{{ m.kicker }}</div>
+              <div style="font-family: var(--font-heading); font-weight: 600; font-size: 40px; line-height: 1;">{{ m.value }}</div>
+              <div class="card-meta">{{ m.meta }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-bottom: var(--space-6);">
+          <div class="blueprint" style="padding: var(--space-4);">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h5 style="margin-bottom: var(--space-4);">AI category breakdown</h5>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <sc-for list="{{ catBars }}" as="b" hint-placeholder-count="5">
+                <div style="display: grid; grid-template-columns: 150px 1fr 30px; gap: 10px; align-items: center;">
+                  <div style="font-size: 12px; text-align: right; color: color-mix(in srgb, var(--color-text) 75%, transparent);">{{ b.label }}</div>
+                  <div style="height: 18px; background: var(--color-neutral-200);"><div style="height: 100%; width: {{ b.pct }}%; background: {{ b.fill }};"></div></div>
+                  <div style="font-size: 12px;">{{ b.count }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div class="blueprint" style="padding: var(--space-4);">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h5 style="margin-bottom: var(--space-4);">Admission rates</h5>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <sc-for list="{{ admBars }}" as="b" hint-placeholder-count="2">
+                <div style="display: grid; grid-template-columns: 150px 1fr 48px; gap: 10px; align-items: center;">
+                  <div style="font-size: 12px; text-align: right; color: color-mix(in srgb, var(--color-text) 75%, transparent);">{{ b.label }}</div>
+                  <div style="height: 18px; background: var(--color-neutral-200);"><div style="height: 100%; width: {{ b.pct }}%; background: {{ b.fill }};"></div></div>
+                  <div style="font-size: 12px;">{{ b.count }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <p class="text-muted" style="font-size: 12px; margin: var(--space-4) 0 0;">Share of evaluated tickets where the appeal itself admits the offense.</p>
+          </div>
+          <div class="blueprint" style="padding: var(--space-4);">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h5 style="margin-bottom: var(--space-4);">Detection method volume</h5>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <sc-for list="{{ detBars }}" as="b" hint-placeholder-count="6">
+                <div style="display: grid; grid-template-columns: 175px 1fr 30px; gap: 10px; align-items: center;">
+                  <div style="font-size: 11px; font-family: ui-monospace, monospace; text-align: right; color: color-mix(in srgb, var(--color-text) 75%, transparent);">{{ b.label }}</div>
+                  <div style="height: 18px; background: var(--color-neutral-200);"><div style="height: 100%; width: {{ b.pct }}%; background: {{ b.fill }};"></div></div>
+                  <div style="font-size: 12px;">{{ b.count }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div class="blueprint" style="padding: var(--space-4);">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h5 style="margin-bottom: var(--space-2);">Ticket volume over time</h5>
+            <svg viewBox="0 0 600 220" style="width: 100%; display: block;">
+              <line x1="36" y1="190" x2="592" y2="190" stroke="var(--color-divider)" stroke-width="1"></line>
+              <line x1="36" y1="10" x2="36" y2="190" stroke="var(--color-divider)" stroke-width="1"></line>
+              <polyline points="{{ volPoints }}" fill="none" stroke="var(--color-accent)" stroke-width="1.5"></polyline>
+              <sc-for list="{{ volDots }}" as="d" hint-placeholder-count="0">
+                <circle cx="{{ d.x }}" cy="{{ d.y }}" r="2.5" fill="var(--color-accent)"></circle>
+              </sc-for>
+              <text x="36" y="208" font-size="10" fill="currentColor" opacity="0.55">{{ volStartLabel }}</text>
+              <text x="592" y="208" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">{{ volEndLabel }}</text>
+              <text x="30" y="14" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">{{ volMaxLabel }}</text>
+              <text x="30" y="193" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">0</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="blueprint" style="padding: var(--space-4); margin-bottom: var(--space-6);">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h5 style="margin-bottom: var(--space-4);">Confidence score distribution</h5>
+          <div style="display: flex; align-items: flex-end; gap: 3px; height: 150px;">
+            <sc-for list="{{ confBins }}" as="b" hint-placeholder-count="20">
+              <div title="{{ b.tip }}" style="flex: 1; height: {{ b.h }}%; min-height: 1px; background: {{ b.fill }};"></div>
+            </sc-for>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px;" class="text-muted"><span>0.0</span><span>0.5</span><span>1.0</span></div>
+        </div>
+
+        <sc-if value="{{ showRawAggregates }}" hint-placeholder-val="{{ true }}">
+          <div data-screen-label="Raw aggregates">
+            <h5 style="margin-bottom: var(--space-3);">Raw aggregates</h5>
+            <div class="seg" style="margin-bottom: var(--space-4);">
+              <sc-for list="{{ aggTabs }}" as="t" hint-placeholder-count="4">
+                <label class="seg-opt"><input type="radio" name="aggtab" checked="{{ t.checked }}" onChange="{{ t.select }}">{{ t.label }}</label>
+              </sc-for>
+            </div>
+            <div class="blueprint" style="max-width: 560px;">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <table class="table">
+                <thead><tr><th>{{ aggCol1 }}</th><th style="text-align: right;">{{ aggCol2 }}</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ aggRows }}" as="r" hint-placeholder-count="5">
+                    <tr><td>{{ r.a }}</td><td style="text-align: right; font-family: ui-monospace, monospace; font-size: 13px;">{{ r.b }}</td></tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </sc-if>
+      </section>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div class="blueprint elev-md" style="position: fixed; right: 24px; bottom: 24px; padding: var(--space-3) var(--space-4); background: var(--color-bg); font-size: 13px; z-index: 50;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      {{ toastText }}
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;defaultTheme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;system&quot;, &quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;system&quot;, &quot;tsType&quot;: &quot;'system' | 'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;},
+  &quot;confidenceAsPercent&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Queue&quot;},
+  &quot;showRawAggregates&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Analytics&quot;}
+}">
+class Component extends DCLogic {
+  state = {
+    view: 'dashboard', theme: 'light', tickets: [],
+    cats: { 'Auto-Deny': true, 'Likely Legitimate': true, 'Admitted to Cheating': true, 'Templated/Bot Appeal': true, 'Needs Review': true, 'Not yet evaluated': true },
+    statuses: { open: true, pending: true, closed: true },
+    confMin: 0, confMax: 1, admittedOnly: false,
+    selectedId: null, showReasoning: false,
+    dateFrom: '', dateTo: '', aggTab: 'Categories',
+    toastText: '', toastVisible: false,
+  };
+
+  componentDidMount() {
+    const stored = localStorage.getItem('ttt-theme');
+    const pref = this.props.defaultTheme ?? 'system';
+    let theme = stored || pref;
+    if (theme === 'system') theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    this.applyTheme(theme);
+    this._mq = window.matchMedia('(prefers-color-scheme: dark)');
+    this._mqFn = (e) => { if (!localStorage.getItem('ttt-theme') && (this.props.defaultTheme ?? 'system') === 'system') this.applyTheme(e.matches ? 'dark' : 'light'); };
+    this._mq.addEventListener('change', this._mqFn);
+    import('./data/tickets-data.js').then((m) => {
+      const tickets = m.TICKETS;
+      const dates = tickets.map((t) => t.created_at.slice(0, 10)).sort();
+      this.setState({ tickets, dateFrom: dates[0], dateTo: dates[dates.length - 1], selectedId: tickets[0] ? tickets[0].ticket_id : null });
+    });
+  }
+  componentWillUnmount() { if (this._mq) this._mq.removeEventListener('change', this._mqFn); }
+
+  applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    this.setState({ theme });
+  }
+
+  tagStyle(cat) {
+    const map = {
+      'Auto-Deny': { background: 'var(--status-deny-bg)', color: 'var(--status-deny-fg)' },
+      'Admitted to Cheating': { background: 'var(--status-admit-bg)', color: 'var(--status-admit-fg)' },
+      'Needs Review': { background: 'var(--status-review-bg)', color: 'var(--status-review-fg)' },
+      'Likely Legitimate': { background: 'var(--status-legit-bg)', color: 'var(--status-legit-fg)' },
+      'Templated/Bot Appeal': { background: 'var(--status-bot-bg)', color: 'var(--status-bot-fg)' },
+    };
+    return Object.assign({ whiteSpace: 'nowrap', fontFamily: 'var(--font-heading)', letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: '10px' }, map[cat] || { color: 'color-mix(in srgb, var(--color-text) 45%, transparent)', border: '1px dashed var(--color-divider)', background: 'transparent' });
+  }
+
+  toast(text) {
+    clearTimeout(this._toastT);
+    this.setState({ toastText: text, toastVisible: true });
+    this._toastT = setTimeout(() => this.setState({ toastVisible: false }), 2600);
+  }
+
+  filteredQueue() {
+    const s = this.state;
+    return s.tickets.filter((t) => {
+      const cat = t.ai_category || 'Not yet evaluated';
+      if (!s.cats[cat]) return false;
+      if (!s.statuses[t.status]) return false;
+      if (t.confidence_score != null && (t.confidence_score < s.confMin || t.confidence_score > s.confMax)) return false;
+      if (s.admittedOnly && t.admitted_cheating !== true) return false;
+      return true;
+    });
+  }
+
+  analyticsSet() {
+    const s = this.state;
+    return s.tickets.filter((t) => {
+      const d = t.created_at.slice(0, 10);
+      return (!s.dateFrom || d >= s.dateFrom) && (!s.dateTo || d <= s.dateTo);
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const setView = (view) => (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ view }); };
+    const navItems = ['Dashboard', 'Queue', 'Analytics'].map((label) => {
+      const view = label.toLowerCase();
+      const active = s.view === view;
+      return {
+        label, current: active ? 'page' : undefined, onClick: setView(view),
+        style: { fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '15px', letterSpacing: '0.05em', textTransform: 'uppercase', textDecoration: 'none', color: active ? 'var(--color-accent)' : 'inherit', borderBottom: active ? '2px solid var(--color-accent)' : '2px solid transparent', paddingBottom: '2px' },
+      };
+    });
+
+    // Dashboard metrics
+    const openCount = s.tickets.filter((t) => t.status === 'open').length;
+    const latestDay = s.tickets.length ? s.tickets[0].created_at.slice(0, 10) : '';
+    const autoDeniedToday = s.tickets.filter((t) => t.ai_category === 'Auto-Deny' && t.created_at.slice(0, 10) === latestDay).length;
+    const needsReview = s.tickets.filter((t) => t.ai_category === 'Needs Review').length;
+    const summaryCards = [
+      { kicker: 'Open tickets', value: String(openCount), meta: 'Queue depth right now' },
+      { kicker: 'Auto-denied today', value: String(autoDeniedToday), meta: 'Deterministic override — ' + latestDay },
+      { kicker: 'Needs review', value: String(needsReview), meta: 'AI-flagged backlog for analysts' },
+    ];
+
+    // Queue
+    const filtered = this.filteredQueue();
+    const queueRows = filtered.map((t) => {
+      const cat = t.ai_category || 'Not yet evaluated';
+      const selected = t.ticket_id === s.selectedId;
+      const glyph = (v) => (v == null ? { g: '', c: 'inherit' } : v ? { g: '\u2611', c: 'var(--color-accent-600)' } : { g: '\u2610', c: 'color-mix(in srgb, var(--color-text) 35%, transparent)' });
+      const gc = glyph(t.admitted_cheating), ge = glyph(t.admitted_exploit);
+      return {
+        id: t.ticket_id, player: t.user_name, userCat: t.ticket_issue_category,
+        aiCat: cat, tagStyle: this.tagStyle(t.ai_category),
+        hasConf: t.confidence_score != null,
+        confPct: t.confidence_score != null ? Math.round(t.confidence_score * 100) : 0,
+        confLabel: t.confidence_score != null ? ((this.props.confidenceAsPercent ?? false) ? Math.round(t.confidence_score * 100) + '%' : t.confidence_score.toFixed(2)) : '',
+        admCheat: gc.g, admCheatColor: gc.c, admExploit: ge.g, admExploitColor: ge.c,
+        status: t.status, submitted: t.created_at.slice(0, 16).replace('T', ' '),
+        select: () => this.setState({ selectedId: t.ticket_id, showReasoning: false }),
+        rowStyle: { cursor: 'pointer', background: selected ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent' },
+      };
+    });
+    const catFilters = Object.keys(s.cats).map((label) => ({
+      label, checked: s.cats[label],
+      toggle: () => this.setState({ cats: Object.assign({}, s.cats, { [label]: !s.cats[label] }) }),
+    }));
+    const statusFilters = Object.keys(s.statuses).map((label) => ({
+      label, checked: s.statuses[label],
+      toggle: () => this.setState({ statuses: Object.assign({}, s.statuses, { [label]: !s.statuses[label] }) }),
+    }));
+
+    // Detail
+    const sel = s.tickets.find((t) => t.ticket_id === s.selectedId) || null;
+    const admLabel = (v) => (v == null ? '— Not evaluated' : v ? 'Yes' : 'No');
+
+    // Analytics
+    const aset = this.analyticsSet();
+    const evaluated = aset.filter((t) => t.ai_category != null);
+    const admC = evaluated.filter((t) => t.admitted_cheating === true).length;
+    const admE = evaluated.filter((t) => t.admitted_exploit === true).length;
+    const pct = (n, d) => (d ? (100 * n / d).toFixed(1) + '%' : '0.0%');
+    const aMetrics = [
+      { kicker: 'Evaluated tickets', value: String(evaluated.length), meta: 'In selected date range' },
+      { kicker: 'Not evaluated', value: String(aset.length - evaluated.length), meta: 'Awaiting the pipeline' },
+      { kicker: 'Cheating admissions', value: String(admC), meta: pct(admC, evaluated.length) + ' of evaluated' },
+      { kicker: 'Exploit admissions', value: String(admE), meta: pct(admE, evaluated.length) + ' of evaluated' },
+    ];
+    const CAT_ORDER = ['Auto-Deny', 'Admitted to Cheating', 'Needs Review', 'Templated/Bot Appeal', 'Likely Legitimate'];
+    const CAT_FILL = { 'Auto-Deny': 'var(--status-deny)', 'Admitted to Cheating': 'var(--status-admit)', 'Needs Review': 'var(--status-review)', 'Templated/Bot Appeal': 'var(--status-bot)', 'Likely Legitimate': 'var(--status-legit)' };
+    const catCounts = {};
+    for (const t of evaluated) catCounts[t.ai_category] = (catCounts[t.ai_category] || 0) + 1;
+    const catEntries = CAT_ORDER.filter((c) => catCounts[c]).map((c) => [c, catCounts[c]]).sort((a, b) => b[1] - a[1]);
+    const catMax = Math.max(1, ...catEntries.map((e) => e[1]));
+    const catBars = catEntries.map(([label, count]) => ({ label, count: String(count), pct: Math.round(100 * count / catMax), fill: CAT_FILL[label] }));
+    const admBars = [
+      { label: 'Admitted cheating', count: pct(admC, evaluated.length), pct: evaluated.length ? Math.round(100 * admC / evaluated.length) : 0, fill: 'var(--status-admit)' },
+      { label: 'Admitted exploit', count: pct(admE, evaluated.length), pct: evaluated.length ? Math.round(100 * admE / evaluated.length) : 0, fill: 'var(--status-exploit)' },
+    ];
+    const detCounts = {};
+    for (const t of aset) { const k = t.detection_method || '(no ban record)'; detCounts[k] = (detCounts[k] || 0) + 1; }
+    const detEntries = Object.entries(detCounts).sort((a, b) => b[1] - a[1]);
+    const detMax = Math.max(1, ...detEntries.map((e) => e[1]));
+    const detBars = detEntries.map(([label, count]) => ({ label, count: String(count), pct: Math.round(100 * count / detMax), fill: 'var(--color-accent-500)' }));
+    // Volume over time
+    const volCounts = {};
+    for (const t of aset) { const d = t.created_at.slice(0, 10); volCounts[d] = (volCounts[d] || 0) + 1; }
+    const volEntries = Object.entries(volCounts).sort((a, b) => a[0].localeCompare(b[0]));
+    const volMax = Math.max(1, ...volEntries.map((e) => e[1]));
+    const X0 = 36, X1 = 592, Y0 = 190, Y1 = 14;
+    const volDots = volEntries.map(([d, c], i) => ({
+      x: (volEntries.length > 1 ? X0 + (X1 - X0) * i / (volEntries.length - 1) : (X0 + X1) / 2).toFixed(1),
+      y: (Y0 - (Y0 - Y1) * c / volMax).toFixed(1),
+    }));
+    const volPoints = volDots.map((p) => p.x + ',' + p.y).join(' ');
+    // Confidence histogram
+    const scores = evaluated.map((t) => t.confidence_score).filter((v) => v != null);
+    const bins = new Array(20).fill(0);
+    for (const v of scores) bins[Math.min(19, Math.floor(v * 20))]++;
+    const binMax = Math.max(1, ...bins);
+    const confBins = bins.map((c, i) => ({ h: Math.round(100 * c / binMax), fill: c ? 'var(--color-accent-500)' : 'var(--color-neutral-200)', tip: (i / 20).toFixed(2) + '\u2013' + ((i + 1) / 20).toFixed(2) + ': ' + c }));
+    // Raw aggregates
+    const aggTabs = ['Categories', 'Detection methods', 'Volume', 'Confidence scores'].map((label) => ({
+      label, checked: s.aggTab === label, select: () => this.setState({ aggTab: label }),
+    }));
+    let aggCol1 = 'ai_category', aggCol2 = 'count', aggRows = catEntries.map(([a, b]) => ({ a, b: String(b) }));
+    if (s.aggTab === 'Detection methods') { aggCol1 = 'detection_method'; aggRows = detEntries.map(([a, b]) => ({ a, b: String(b) })); }
+    else if (s.aggTab === 'Volume') { aggCol1 = 'date'; aggRows = volEntries.map(([a, b]) => ({ a, b: String(b) })); }
+    else if (s.aggTab === 'Confidence scores') {
+      aggCol1 = 'statistic'; aggCol2 = 'value';
+      const n = scores.length, mean = n ? scores.reduce((x, y) => x + y, 0) / n : 0;
+      const sorted = scores.slice().sort((a, b) => a - b);
+      const q = (p) => (n ? sorted[Math.min(n - 1, Math.floor(p * n))] : 0);
+      const std = n ? Math.sqrt(scores.reduce((acc, v) => acc + (v - mean) * (v - mean), 0) / n) : 0;
+      aggRows = [['count', String(n)], ['mean', mean.toFixed(3)], ['std', std.toFixed(3)], ['min', (sorted[0] || 0).toFixed(2)], ['25%', q(0.25).toFixed(2)], ['50%', q(0.5).toFixed(2)], ['75%', q(0.75).toFixed(2)], ['max', (sorted[n - 1] || 0).toFixed(2)]].map(([a, b]) => ({ a, b }));
+    }
+
+    return {
+      navItems, isDark: s.theme === 'dark', isLight: s.theme !== 'dark',
+      onToggleTheme: () => { const t = s.theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('ttt-theme', t); this.applyTheme(t); },
+      onRefresh: () => this.toast('Data refreshed from the latest DB state.'),
+      isDashView: s.view === 'dashboard', isQueueView: s.view === 'queue', isAnalyticsView: s.view === 'analytics',
+      goQueue: () => this.setState({ view: 'queue' }), goAnalytics: () => this.setState({ view: 'analytics' }),
+      summaryCards,
+      catFilters, statusFilters,
+      confMin: s.confMin, confMax: s.confMax,
+      confRangeLabel: s.confMin.toFixed(2) + ' \u2013 ' + s.confMax.toFixed(2),
+      onConfMin: (e) => this.setState({ confMin: Math.min(parseFloat(e.target.value), s.confMax) }),
+      onConfMax: (e) => this.setState({ confMax: Math.max(parseFloat(e.target.value), s.confMin) }),
+      admittedOnly: s.admittedOnly, onAdmittedOnly: () => this.setState({ admittedOnly: !s.admittedOnly }),
+      queueRows, queueEmpty: s.tickets.length > 0 && filtered.length === 0,
+      queueCaption: 'Showing ' + filtered.length + ' of ' + s.tickets.length + ' tickets \u2014 click a row to inspect it.',
+      hasSelected: !!sel,
+      dTicketId: sel ? sel.ticket_id : '', dPlayer: sel ? sel.user_name : '', dUserId: sel ? sel.user_id : '',
+      dSubmitted: sel ? sel.created_at.slice(0, 16).replace('T', ' ') : '',
+      dUserCat: sel ? sel.ticket_issue_category : '', dTitle: sel ? sel.ticket_title : '', dBody: sel ? sel.ticket_body : '',
+      dStatus: sel ? sel.status : 'open',
+      onStatusChange: (e) => {
+        const v = e.target.value;
+        this.setState({ tickets: s.tickets.map((t) => (t.ticket_id === s.selectedId ? Object.assign({}, t, { status: v }) : t)) });
+        this.toast('Ticket ' + s.selectedId + ': ' + (sel ? sel.status : '') + ' \u2192 ' + v);
+      },
+      dHasBan: !!(sel && sel.ban_reason), dNoBan: !!(sel && !sel.ban_reason),
+      dBanReason: sel ? sel.ban_reason : '', dDetection: sel ? sel.detection_method : '',
+      dBanDuration: sel ? sel.ban_duration : '', dBanDate: sel ? sel.ban_date : '',
+      dEvaluated: !!(sel && sel.ai_category), dNotEvaluated: !!(sel && !sel.ai_category),
+      dAiCat: sel ? (sel.ai_category || 'Not yet evaluated') : '', dTagStyle: this.tagStyle(sel ? sel.ai_category : null),
+      dConfPct: sel && sel.confidence_score != null ? Math.round(sel.confidence_score * 100) : 0,
+      dConfLabel: sel && sel.confidence_score != null ? Math.round(sel.confidence_score * 100) + '%' : '',
+      dAdmCheat: sel ? admLabel(sel.admitted_cheating) : '', dAdmExploit: sel ? admLabel(sel.admitted_exploit) : '',
+      dSummary: sel ? sel.ai_summary : '', dReasoning: sel ? sel.ai_reasoning : '',
+      showReasoning: s.showReasoning,
+      reasoningToggleLabel: s.showReasoning ? 'Hide full reasoning' : 'Show full reasoning',
+      onToggleReasoning: () => this.setState({ showReasoning: !s.showReasoning }),
+      dateFrom: s.dateFrom, dateTo: s.dateTo,
+      onDateFrom: (e) => this.setState({ dateFrom: e.target.value }),
+      onDateTo: (e) => this.setState({ dateTo: e.target.value }),
+      aMetrics, catBars, admBars, detBars,
+      volPoints, volDots,
+      volStartLabel: volEntries.length ? volEntries[0][0] : '', volEndLabel: volEntries.length ? volEntries[volEntries.length - 1][0] : '',
+      volMaxLabel: String(volMax),
+      confBins,
+      showRawAggregates: this.props.showRawAggregates ?? true,
+      aggTabs, aggCol1, aggCol2, aggRows,
+      toastVisible: s.toastVisible, toastText: s.toastText,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -10,6 +10,10 @@ __pycache__/
 # Test & coverage artifacts
 .pytest_cache/
 .coverage
+htmlcov/
+
+# Office lock files (the ~$ prefix mangles the name, so a filename glob misses them)
+~$*
 
 # Generated performance datasets (recreate with scripts/generate_tickets.py)
 data/perf_tickets.json
@@ -35,8 +39,11 @@ build/
 # Claude Code (local tooling config)
 .claude/
 
-# Planning docs (already-tracked files stay tracked; new files are ignored)
+# Planning docs and checklists — kept locally, never published
 planning/
+
+# Developer guide — kept locally, not published
+ticket-tech-titan-dev-guide*.docx
 
 # OS
 .DS_Store

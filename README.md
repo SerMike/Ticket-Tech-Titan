@@ -30,7 +30,7 @@ flowchart TD
     ST -->|"LEFT JOIN on user_id"| EV
     BD --> EV
     WR --> AI[("support_tickets_with_ai")]
-    subgraph DASH["Streamlit dashboard"]
+    subgraph DASH["Dashboard (FastAPI + web/)"]
         Q["Queue + ticket detail"]
         AN["Analytics charts"]
     end
@@ -50,6 +50,10 @@ flowchart TD
 **Analytics** — category breakdown, admission rates, detection-method volume, ticket volume over time, and confidence distribution:
 
 ![Analytics page](docs/screenshots/analytics.png)
+
+**Dashboard, light theme** — the same interface follows your OS light/dark setting, or the toggle in the top-right:
+
+![Dashboard page in light mode](docs/screenshots/dashboard-light.png)
 
 ## Quickstart
 
@@ -73,7 +77,7 @@ copy .env.example .env                # then set ANTHROPIC_API_KEY and the
 python database/init_db.py            # schema + ticket categories
 python ingestion/ingest_ticket.py --tickets data/sample_tickets.json --bans data/sample_bans.json
 python evaluation/run_pipeline.py --limit 5    # ~5 cents of API spend
-streamlit run dashboard/app.py        # http://localhost:8501
+uvicorn api.main:app                  # http://localhost:8000
 ```
 
 Drop `--limit 5` to evaluate all 50 sample tickets (well under a dollar).
@@ -93,7 +97,7 @@ Drop `--limit 5` to evaluate all 50 sample tickets (well under a dollar).
 - **The LLM proposes; deterministic rules dispose.** [`auto_deny.py`](evaluation/auto_deny.py) overrides the model's category to Auto-Deny whenever the ban record carries a confirmed technical detection (cheat-engine signature, aim-lock, speed-hack, connection manipulation) — a persuasive appeal can never talk a confirmed cheater out of a ban, no matter what the model says.
 - **Model output is untrusted input.** Every response is parsed and schema-validated in [`evaluator.py`](evaluation/evaluator.py) — required fields, category whitelist, strict booleans, confidence range — before anything touches the database. Malformed output marks the ticket for review; it never corrupts a row.
 - **Idempotent by construction.** Evaluations UPSERT on `ticket_id` ([`writer.py`](evaluation/writer.py)) and the pipeline commits per ticket, so re-runs are safe, re-evaluations replace rather than duplicate, and one bad ticket can't poison a batch.
-- **Offline-testable layering.** 58 tests run with no database or API key — the DB layer, LLM client, and orchestration are all mockable seams. Integration tests exist but are opt-in (`pytest -m integration`).
+- **Offline-testable layering.** 69 tests run with no database or API key — the DB layer, LLM client, and orchestration are all mockable seams. Integration tests exist but are opt-in (`pytest -m integration`).
 
 ## Performance
 
@@ -102,38 +106,63 @@ Sequential throughput is **~6.2 s/ticket**, almost entirely API-bound (one synch
 ## Running the dashboard
 
 ```
-streamlit run dashboard/app.py
+uvicorn api.main:app
 ```
 
-Opens at http://localhost:8501. The dashboard has three pages:
+Opens at http://localhost:8000 (or run `scripts\run_api.cmd` on Windows). One
+FastAPI process serves both the JSON API and the static front-end in `web/`, so
+there are no CORS concerns and nothing to build — the front-end is plain
+HTML/CSS/JS.
 
-| Page | URL | Purpose |
-|------|-----|---------|
-| Dashboard | `/` | Summary metrics — open tickets, auto-denies today, needs-review backlog |
-| Queue | `/queue` | Filterable ticket table; click any ticket to read the full appeal, ban record, and AI evaluation, and update its status |
-| Analytics | `/analytics` | Plotly charts — category breakdown, admission rates, detection methods, volume over time |
+The dashboard is a single-page app with three views:
 
-Use the **🔄 Refresh data** button in the sidebar to pull the latest DB state at any time.
+| View | Purpose |
+|------|---------|
+| Dashboard | Summary metrics — open tickets, auto-denies today, needs-review backlog |
+| Queue | Filterable ticket table; click any ticket to read the full appeal, ban record, and AI evaluation, and update its status |
+| Analytics | Category breakdown, admission rates, detection methods, volume over time, and confidence distribution |
+
+Use the **Refresh data** button to re-fetch the latest DB state, and the
+sun/moon button to switch between light and dark themes (the choice persists in
+`localStorage`; with no stored choice it follows the OS setting).
+
+### API endpoints
+
+`dashboard/db.py` is the seam — the API is a thin JSON wrapper over it.
+
+| Endpoint | Returns |
+|---|---|
+| `GET /api/tickets` | Every ticket joined with its AI evaluation and ban record, newest first |
+| `GET /api/tickets/{id}` | One joined ticket row (404 when missing) |
+| `GET /api/tickets/{id}/evaluation` | `ai_summary` and `ai_reasoning` for a ticket (404 when unevaluated) |
+| `PATCH /api/tickets/{id}/status` | Body `{"status": "open"\|"pending"\|"closed"}`; returns old + new status, 400 on an invalid status or unknown ticket |
+| `GET /api/analytics?date_from=&date_to=` | Category breakdown, admission rates, detection-method counts, volume over time, confidence scores |
+| `GET /api/stats` | `open_count`, `auto_denied_today`, `needs_review` |
+| `GET /api/date-bounds` | Earliest and latest ticket dates |
 
 ## Running tests
 
-58 tests: 55 unit tests that run fully offline (no DB, no API key) plus 3 integration tests gated behind a marker.
+72 tests: 69 unit tests that run fully offline (no DB, no API key) plus 3 integration tests gated behind a marker.
 
 ```
 pytest                        # unit tests only — no DB or API key required
 pytest -m integration         # integration tests (live PostgreSQL; idempotency test uses 2 API calls)
-pytest --cov=evaluation --cov=ingestion --cov=config --cov=dashboard --cov-report=term-missing
+pytest --cov=evaluation --cov=ingestion --cov=config --cov=dashboard --cov=api --cov-report=term-missing
 ```
 
 ## Project structure
 
 ```
-dashboard/          Streamlit UI
-  app.py            Landing page + summary metrics
-  db.py             All DB queries (read + status update)
-  pages/
-    01_queue.py     Ticket queue with filters and detail view
-    02_analytics.py Aggregate charts
+api/
+  main.py           FastAPI app — JSON endpoints over db.py + static file serving
+
+web/                Single-page front-end (no build step)
+  index.html        Shell, theme tokens, status colors
+  app.js            State, views, filtering/aggregation, API calls
+  industry-styles.css  Design-system stylesheet
+
+dashboard/
+  db.py             All DB queries (read + status update) — the API's seam
 
 database/
   schema.sql        PostgreSQL schema
@@ -155,11 +184,17 @@ reference/          Industry ban-policy reference docs
 config/
   settings.py       DB connection, ALLOWED_STATUSES
 
-tests/              55 offline unit tests + 3 opt-in integration tests
+tests/              69 offline unit tests + 3 opt-in integration tests
 scripts/
+  run_api.cmd          Launch the API + dashboard on Windows
   generate_tickets.py  Synthetic ticket/ban generator for perf testing
+  capture_screenshots.py  Regenerates the README screenshots
   smoke_client.py      Manual live-API smoke test
   smoke_evaluate.py    Manual end-to-end evaluation spot-check
 docs/
   performance-notes.md Performance baseline + scaling analysis
+  screenshots/         README images, regenerated by capture_screenshots.py
+  design/              Design source of truth for web/ — the Industry design
+                       system generated with Claude Design: prototype, tokens,
+                       and rendered references for both themes
 ```

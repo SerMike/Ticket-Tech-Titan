@@ -1,6 +1,8 @@
-"""db.py — Database access layer for the Streamlit dashboard.
+"""db.py — Database access layer for the dashboard.
 
-All dashboard SQL queries live here so pages stay UI-only. The
+All dashboard SQL queries live here so callers stay UI-only; the
+FastAPI app in ``api/main.py`` is a thin JSON wrapper over this
+module. The
 connection itself is NOT duplicated — this module re-exports the
 shared ``get_connection`` from ``config.settings`` so the dashboard
 and the ingestion pipeline share one source of truth for DB config.
@@ -17,9 +19,9 @@ from datetime import date as _date
 from pathlib import Path
 from typing import Any
 
-# When launched via `streamlit run dashboard/app.py`, sys.path includes
-# the ``dashboard/`` folder but not the project root. Insert the project
-# root so ``from config.settings import ...`` resolves for every page.
+# When this module is imported with ``dashboard/`` rather than the
+# project root on sys.path, ``from config.settings import ...`` would
+# fail. Insert the project root so the import resolves either way.
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))

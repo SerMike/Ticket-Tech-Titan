@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket Tech Titan</title>
+<script>
+  // Apply the stored/system theme before first paint to avoid a flash.
+  (function () {
+    var stored = localStorage.getItem('ttt-theme');
+    var theme = stored || 'system';
+    if (theme === 'system') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<link rel="stylesheet" href="industry-styles.css">
+<style>
+  html { background: var(--color-bg); }
+  body { transition: background 0.2s, color 0.2s; }
+  :root:not([data-theme="dark"]) {
+    --color-bg: oklch(0.955 0.012 85);
+    --color-surface: oklch(0.93 0.014 85);
+    --color-divider: color-mix(in srgb, #1d1f20 18%, transparent);
+  }
+  a { color: var(--color-accent); } a:hover { color: var(--color-accent-600); }
+  :root[data-theme="dark"] {
+    --color-bg: oklch(0.21 0.012 85);
+    --color-surface: oklch(0.26 0.014 85);
+    --color-text: #e6e7e9;
+    --color-accent: #7ea3c9;
+    --color-accent-2: #8ba7c4;
+    --color-divider: color-mix(in srgb, #e6e7e9 18%, transparent);
+    --color-neutral-100: #2b2b2d; --color-neutral-200: #424244; --color-neutral-300: #5d5d60;
+    --color-neutral-400: #7a7a7d; --color-neutral-500: #98989b; --color-neutral-600: #b7b7ba;
+    --color-neutral-700: #d4d4d7; --color-neutral-800: #e7e7ea; --color-neutral-900: #f5f5f8;
+    --color-accent-100: #1d2d3d; --color-accent-200: #2c455d; --color-accent-300: #416180;
+    --color-accent-400: #597ea3; --color-accent-500: #749dc4; --color-accent-600: #94bce3;
+    --color-accent-700: #b5d9fd; --color-accent-800: #d6ebff; --color-accent-900: #eef6ff;
+    --color-accent-2-100: #1f2d3a; --color-accent-2-200: #314457; --color-accent-2-300: #486077;
+    --color-accent-2-400: #627d98; --color-accent-2-500: #7e9cb8; --color-accent-2-600: #9ebbd8;
+    --color-accent-2-700: #bdd8f2; --color-accent-2-800: #d6ebff; --color-accent-2-900: #eef6ff;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+    --shadow-md: 0 3px 10px rgba(0,0,0,0.55);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.65);
+  }
+  /* Semantic status hues — derived in OKLCH on the accent's own lightness/chroma
+     scale so they sit in the same visual register as the steel ramp. */
+  :root {
+    --status-deny: oklch(0.56 0.13 25);      --status-deny-bg: oklch(0.92 0.04 25);   --status-deny-fg: oklch(0.38 0.12 25);
+    --status-admit: oklch(0.62 0.11 65);     --status-admit-bg: oklch(0.93 0.045 70); --status-admit-fg: oklch(0.4 0.09 60);
+    --status-review: oklch(0.72 0.11 92);    --status-review-bg: oklch(0.94 0.06 95); --status-review-fg: oklch(0.44 0.08 85);
+    --status-legit: oklch(0.58 0.1 155);     --status-legit-bg: oklch(0.92 0.045 155); --status-legit-fg: oklch(0.37 0.08 155);
+    --status-bot: var(--color-neutral-500);  --status-bot-bg: var(--color-neutral-200); --status-bot-fg: var(--color-neutral-800);
+    --status-exploit: oklch(0.56 0.11 300);
+  }
+  :root[data-theme="dark"] {
+    --status-deny: oklch(0.66 0.13 25);      --status-deny-bg: oklch(0.32 0.07 25);   --status-deny-fg: oklch(0.86 0.05 25);
+    --status-admit: oklch(0.7 0.11 65);      --status-admit-bg: oklch(0.33 0.06 65);  --status-admit-fg: oklch(0.88 0.05 70);
+    --status-review: oklch(0.76 0.11 92);    --status-review-bg: oklch(0.35 0.06 92); --status-review-fg: oklch(0.89 0.06 95);
+    --status-legit: oklch(0.68 0.1 155);     --status-legit-bg: oklch(0.32 0.05 155); --status-legit-fg: oklch(0.87 0.05 155);
+    --status-exploit: oklch(0.68 0.11 300);
+  }
+  /* ── Project overrides on the Industry design system ──────────────────
+     These live here, after the stylesheet link, so industry-styles.css can
+     stay byte-for-byte as shipped and be swapped for a newer version. */
+  /* Card captions, bumped from the design-system defaults (11px / 50% mix)
+     for legibility. */
+  .card-meta {
+    font-size: 13px;
+    color: color-mix(in srgb, var(--color-text) 75%, transparent);
+  }
+  /* Kicker labels, bumped from the design-system defaults (10px / --color-accent).
+     Uses the accent ramp rather than a fixed darker hex so the step inverts
+     with the theme — 800 is the darkest end in light, the lightest in dark. */
+  .card-kicker {
+    font-size: 12px;
+    color: var(--color-accent-800);
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -49,10 +49,11 @@ Realistic paths to the target, deliberately out of scope for Phase 4:
 | `get_ticket_detail` | 33 ms |
 | `get_ticket_date_bounds` | 32 ms |
 
-All queries stay well under perceptible latency, before Streamlit's
-`@st.cache_data` layer is even involved. Queue filtering and analytics
-charts render instantly at this volume; the DB will not be the bottleneck
-until well past 10k tickets.
+All queries stay well under perceptible latency. The front-end fetches
+the queue once and does all filtering and aggregation client-side, so
+these costs are paid on load and on an explicit refresh rather than per
+interaction; the DB will not be the bottleneck until well past 10k
+tickets.
 
 ## Cleanup
 
