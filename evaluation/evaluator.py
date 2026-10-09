@@ -1,6 +1,6 @@
 """evaluator.py — Core evaluate_ticket() function.
 
-Glues the prompt builders and the Anthropic client together. Takes a
+Glues the prompt builders and the LLM client together. Takes a
 ticket and (optional) ban record, calls the model, parses the JSON
 response, and returns a dict matching the support_tickets_with_ai
 schema.
@@ -147,7 +147,8 @@ def evaluate_ticket(ticket: dict, ban_record: dict | None) -> dict:
         EvaluationError: model returned malformed JSON or failed schema
             validation. The pipeline should log and mark the ticket for
             manual review rather than crash.
-        anthropic.APIError (or subclass): the API call itself failed.
+        anthropic.APIError or openai.APIError (or a subclass), depending on
+            LLM_PROVIDER: the API call itself failed.
     """
     ticket_id = ticket.get("ticket_id", "UNKNOWN")
 

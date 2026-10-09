@@ -23,9 +23,30 @@ for _key, _value in dotenv_values(_ENV_PATH).items():
 # Database
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Anthropic API
+
+def _llm_choice(provider: str | None, model: str | None) -> tuple[str, str | None]:
+    """Resolve LLM_PROVIDER and MODEL_NAME from their raw environment values.
+
+    Unset means Anthropic with its default model, so an existing .env keeps
+    working unchanged. Other providers get no default model: the right name
+    depends on whose endpoint it is, so evaluation/client.py asks for one.
+    """
+    provider = (provider or "anthropic").strip().lower()
+    if not model and provider == "anthropic":
+        model = "claude-sonnet-4-6"
+    return provider, model or None
+
+
+# LLM provider: "anthropic" (default) or "openai". The latter speaks the OpenAI
+# chat-completions API, which OpenAI serves and Gemini, Groq and local Ollama
+# models imitate; LLM_BASE_URL points it at them. See "Using other models" in
+# the README.
+LLM_PROVIDER, MODEL_NAME = _llm_choice(os.getenv("LLM_PROVIDER"), os.getenv("MODEL_NAME"))
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-MODEL_NAME = os.getenv("MODEL_NAME", "claude-sonnet-4-6")
+# Whatever key the OpenAI-compatible endpoint expects: an OpenAI, Gemini or
+# Groq key. Ollama ignores it, but the SDK still wants a non-empty value.
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL") or None
 
 # LLM pricing — USD per million tokens, as (input, output), keyed by model.
 #
@@ -36,6 +57,9 @@ MODEL_NAME = os.getenv("MODEL_NAME", "claude-sonnet-4-6")
 #
 # Verified against Anthropic's published pricing 2026-08-16. Re-check when
 # adding a model; nothing in the test suite can catch a stale number here.
+# Models reached through LLM_PROVIDER=openai aren't listed until someone
+# verifies their prices the same way; until then, price yours with the
+# PRICE_PER_MTOK_* override below.
 MODEL_PRICES: dict[str, tuple[float, float]] = {
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-sonnet-5": (3.00, 15.00),
@@ -47,7 +71,7 @@ MODEL_PRICES: dict[str, tuple[float, float]] = {
 # costed without a code change. Both must be set for the override to apply.
 _price_in = os.getenv("PRICE_PER_MTOK_INPUT")
 _price_out = os.getenv("PRICE_PER_MTOK_OUTPUT")
-if _price_in and _price_out:
+if _price_in and _price_out and MODEL_NAME:
     MODEL_PRICES[MODEL_NAME] = (float(_price_in), float(_price_out))
 
 # Allowed values for support_tickets.status. Mirrors the CHECK constraint

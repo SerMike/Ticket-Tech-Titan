@@ -46,6 +46,7 @@ for _stream in (sys.stdout, sys.stderr):
 
 from config import settings  # noqa: E402
 from evaluation.auto_deny import enforce_auto_deny  # noqa: E402
+from evaluation.client import get_provider  # noqa: E402
 from evaluation.evaluator import EvaluationError, evaluate_ticket  # noqa: E402
 from evaluation.writer import WriterError, save_evaluation  # noqa: E402
 
@@ -191,8 +192,12 @@ def run_pipeline(force: bool, ticket_id: str | None, limit: int | None) -> Pipel
     if not settings.DATABASE_URL:
         print("ERROR: DATABASE_URL is not set in .env", file=sys.stderr)
         sys.exit(1)
-    if not settings.ANTHROPIC_API_KEY:
-        print("ERROR: ANTHROPIC_API_KEY is not set in .env", file=sys.stderr)
+    # Builds the configured provider's client now, so a missing key or model
+    # fails once, up front, instead of once per ticket.
+    try:
+        get_provider()
+    except RuntimeError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(1)
 
     sql, params = _build_fetch_query(force, ticket_id, limit)

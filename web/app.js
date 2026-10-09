@@ -696,7 +696,7 @@ function renderCosts() {
     + barRow('96px 1fr 62px', 'Analyst time', Math.round(100 * analystCost / roiMax), 'var(--status-admit)', usd(analystCost))
     + '</div>'
     + '<p class="text-muted" style="font-size: 12px; margin: var(--space-4) 0 0;">Assumes each priced evaluation displaces '
-    + esc(s.minutesSaved) + ' minutes of manual triage. Failed and retried API calls burn tokens that are never recorded, so real spend is at or above the figure shown.</p>');
+    + esc(s.minutesSaved) + ' minutes of manual triage. Spend is priced at each model\'s full rate: failed and retried API calls burn tokens that are never recorded, and a provider\'s discount on cached prompt tokens (automatic on OpenAI) isn\'t applied.</p>');
 
   return '<section>' + head + cardsHtml + untrackedNote
     + '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-bottom: var(--space-6);">'
