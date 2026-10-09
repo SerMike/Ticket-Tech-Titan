@@ -1,20 +1,55 @@
+<a id="readme-top"></a>
+
 # Ticket Tech Titan
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 [![CI](https://github.com/SerMike/Ticket-Tech-Titan/actions/workflows/ci.yml/badge.svg)](https://github.com/SerMike/Ticket-Tech-Titan/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-AI-powered triage for game ban-appeal tickets: an LLM reads each ban appeal against the internal ban evidence, summarizes it for analysts, sorts it into one of five priority buckets, and a deterministic rule layer guarantees confirmed cheaters can't talk their way out. All ban appeals in this workflow is reviewed by a human and this process is mainly for prioritizing genuine ban appeals to be surfaced to a human reviewer and prevent a player from being delayed a response because of unnecessary bot templated appeals gumming up the works. 
+AI-powered triage for game ban-appeal tickets. An LLM reads each ban appeal against the internal ban evidence, summarizes it for analysts, and sorts it into one of five priority buckets, and a deterministic rule layer guarantees confirmed cheaters can't talk their way out. Every ban appeal is still reviewed by a human. The point is prioritization: getting genuine appeals in front of a reviewer fast, so a player isn't left waiting on a response because templated bot appeals are gumming up the works.
 
-## Why I built this
+```mermaid
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif','fontSize':'14px','lineColor':'#7a7a7d'}}}%%
+flowchart LR
+    A["<b>Ingest</b><br/>tickets + ban records"] --> B["<b>Evaluate</b><br/>Claude reads the appeal"] --> C["<b>Enforce</b><br/>rules catch confirmed cheats"] --> D["<b>Review</b><br/>analysts work the queue"]
+    classDef step fill:#eef6ff,stroke:#597ea3,stroke-width:1.5px,color:#1d2d3d
+    classDef rule fill:#f8dcd8,stroke:#b84f47,stroke-width:1.5px,color:#7a2a26
+    classDef review fill:#2c455d,stroke:#1d2d3d,color:#ffffff
+    class A,B step
+    class C rule
+    class D review
+```
 
-As a Security Data Analyst on Bungie's Product Security team, I spent 3–4 hours of every workday triaging Destiny 2 ban-appeal tickets. The routine was always the same: open a ticket, read the appeal, look up the player's profile in a separate internal tool, review the case and conclude, most of the time, that the ban was justified and none of it had needed my attention. Worse, a flood of templated, botnet-generated appeals buried the tickets that actually mattered: the rare players who might have been banned mistakenly or accidentally.
+**Contents:** [Background](#based-on-a-system-shipped-in-production-at-bungie) · [How it works](#how-it-works) · [Screenshots](#screenshots) · [Getting started](#getting-started) · [Running tests](#running-tests) · [Configuration](#configuration) · [API reference](#api-reference) · [Design notes](#design-notes) · [Project structure](#project-structure)
 
-Classical machine learning couldn't fix this. The appeal body is a freeform field where players write long, winding appeals, and traditional classifiers broke down on them quickly. An LLM doesn't: it digests a rambling appeal into a 2–3 sentence summary, weighs the player's claims against the internal ban evidence, and returns its judgment as strict JSON that flows straight back into a database. You end up with the best of both worlds: the programmatic, deterministic value of a traditional data pipeline with the flexibility of a model that can actually read. The first version was conceived in late 2023 on the GPT-3.5 API (the only commercial model available at the outset) and deployed in January 2024 after a 3–4 month build alongside a project manager, a data scientist, and a data engineer. My daily triage time dropped from 3–4 hours to 20 minutes–1 hour depending on if we implemented new detection in a ban wave, and the team later helped adapt the workflow to wider player-support queries so urgent requests surfaced faster with better priorities.
+## Based on a system shipped in production at Bungie
 
-This repository is a (very) rough from-scratch rebuild of that system, using synthetic data and Claude Sonnet 4.6 in place of confidential tickets and the original model. The real thing took many people months to cultivate, iterate on, test, deploy, and test again. This rebuild exists to show concretely that AI in a production workflow delivers a meaningful return on time and investment and to document what that takes in practice: prompt engineering grounded in real ban policy, schema design that treats model output as untrusted input, and an architecture that stays fully testable without a database or an API key.
+As a **Security Data Analyst on Bungie's Product Security team**, I spent 3–4 hours of every workday triaging Destiny 2 ban-appeal tickets. The routine was always the same: open a ticket, read the appeal, look up the player's profile in a separate internal tool, review the case, and conclude, most of the time, that the ban was justified and none of it had needed my attention. Worse, a flood of templated, botnet-generated appeals buried the tickets that actually mattered: the rare players who might have been banned mistakenly or accidentally.
 
-## Architecture
+Classical machine learning couldn't fix this. The appeal body is a freeform field where players write long, winding appeals, and traditional classifiers broke down on them quickly. An LLM doesn't: it digests a rambling appeal into a 2–3 sentence summary, weighs the player's claims against the internal ban evidence, and returns its judgment as strict JSON that flows straight back into a database. You end up with the best of both worlds: the programmatic, deterministic value of a traditional data pipeline with the flexibility of a model that can actually read.
+
+I conceived the first version in late 2023 on the GPT-3.5 API (the only commercial model available at the outset) and it shipped to production in January 2024 after a 3–4 month build alongside a project manager, a data scientist, and a data engineer. **My daily triage time dropped from 3–4 hours to 20 minutes–1 hour**, depending on if we implemented new detection in a ban wave. The team later helped adapt the workflow to wider player-support queries, so urgent requests surfaced faster with better priorities.
+
+This repository is a from-scratch, rough approximation of the real system that took a small, dedicated team over a handful of months to build. It uses synthetic data and Claude Sonnet 4.6 in place of confidential tickets and the original model. It exists to show concretely that AI in a production workflow delivers a meaningful return on time and investment, and to document what that takes in practice: prompt engineering grounded in real ban policy, schema design that treats model output as untrusted input, and an architecture that stays fully testable without a database or an API key.
+
+<p align="right"><a href="#readme-top">↑ Back to top</a></p>
+
+## How it works
+
+1. **Ingest** — ticket and ban-record JSON exports are validated and loaded into PostgreSQL.
+2. **Evaluate** — Claude reads each appeal against its ban record and returns a summary, reasoning, a category, and a confidence score as JSON.
+3. **Enforce** — deterministic rules override the model whenever the ban record shows a confirmed technical detection.
+4. **Review** — analysts work the prioritized queue in a web dashboard, with analytics and per-decision cost tracking.
+
+Each ticket lands in one of five categories:
+
+| Category | Meaning |
+|---|---|
+| Auto-Deny | The ban record shows a confirmed technical detection (e.g. cheat-engine signature, aim-lock, speed-hack, connection manipulation); also enforced by deterministic rules |
+| Admitted to Cheating | The appeal itself admits to cheating, exploiting, mods, or other prohibited behavior |
+| Templated/Bot Appeal | Generic, copy-pasted, or bot-generated text with no case-specific detail |
+| Likely Legitimate | Rare: weak or missing ban evidence plus a specific, verifiable appeal; flagged for priority human review |
+| Needs Review | Doesn't fit cleanly elsewhere, or the model is uncertain; needs an analyst's judgment |
 
 ```mermaid
 flowchart TD
@@ -24,7 +59,7 @@ flowchart TD
     I --> ST[("support_tickets")]
     I --> BD[("ban_database")]
     subgraph PIPE["Evaluation pipeline (run_pipeline.py)"]
-        EV["LLM evaluation<br/>claude-sonnet-4-6 by default<br/>(evaluator.py)"] --> AD["Auto-deny override<br/>deterministic safety net<br/>(auto_deny.py)"]
+        EV["LLM evaluation<br/>claude-sonnet-4-6<br/>(evaluator.py)"] --> AD["Auto-deny override<br/>deterministic safety net<br/>(auto_deny.py)"]
         AD --> WR["Schema-validated UPSERT<br/>(writer.py)"]
     end
     ST -->|"LEFT JOIN on user_id"| EV
@@ -43,9 +78,11 @@ flowchart TD
     Q -->|"audit trail"| TH[("ticket_status_history")]
 ```
 
+<p align="right"><a href="#readme-top">↑ Back to top</a></p>
+
 ## Screenshots
 
-**Ticket queue** — AI-triaged queue with category tags and confidence scores, plus the per-ticket detail view pairing the player's appeal with the internal ban record and the AI's evaluation:
+**Ticket queue** — the AI-triaged queue with category tags and confidence scores, plus the detail view pairing the player's appeal with the ban record and the AI's evaluation:
 
 ![Queue page](docs/screenshots/queue.png)
 
@@ -53,174 +90,126 @@ flowchart TD
 
 ![Analytics page](docs/screenshots/analytics.png)
 
-**Costs** — what each AI decision actually cost: spend per day, cumulative spend, spend by model, and API spend set against the analyst time it displaced at a configurable hourly rate:
+**Costs** — spend per day, cumulative spend, spend by model, and API spend set against the analyst time it displaced:
 
 ![Costs page](docs/screenshots/costs.png)
 
-**Dashboard, light theme** — the same interface follows your OS light/dark setting, or the toggle in the top-right:
+**Light theme** — follows your OS setting, or the toggle in the top-right:
 
 ![Dashboard page in light mode](docs/screenshots/dashboard-light.png)
 
-## Quickstart
+<p align="right"><a href="#readme-top">↑ Back to top</a></p>
 
-### Zero setup — run the tests
+## Getting started
 
-The unit suite needs no database, no API key, and no configuration:
+### Prerequisites
 
-```
+- Python 3.11+
+- Docker (or your own PostgreSQL 16 — see [Configuration](#configuration))
+- An [Anthropic API key](https://console.anthropic.com/)
+- Node 22+ *(optional, only for the front-end tests)*
+
+### 1. Install
+
+```bash
+git clone https://github.com/SerMike/Ticket-Tech-Titan.git
+cd Ticket-Tech-Titan
+python -m venv venv
+source venv/bin/activate          # Git Bash on Windows: source venv/Scripts/activate
 pip install -r requirements.txt -r requirements-dev.txt
-pytest
 ```
 
-### Full demo — Docker
+### 2. Configure
 
-Requires Docker and an [Anthropic API key](https://console.anthropic.com/), or a
-key for OpenAI, Gemini or Groq, or a local Ollama model: see **Using other
-models** below.
-
+```bash
+cp .env.example .env
 ```
+
+Edit `.env` and set:
+
+```bash
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ticket_tech_titan
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+### 3. Start the database and load sample data
+
+```bash
 docker compose up -d                  # PostgreSQL 16 on localhost:5432
-copy .env.example .env                # then set ANTHROPIC_API_KEY and the
-                                      # docker DATABASE_URL shown in the file
-python database/init_db.py            # schema + ticket categories
-python ingestion/ingest_ticket.py --tickets data/sample_tickets.json --bans data/sample_bans.json
-python evaluation/run_pipeline.py --limit 5    # ~5 cents of API spend
-uvicorn api.main:app                  # http://localhost:8000
-```
-
-Drop `--limit 5` to evaluate all 50 sample tickets (well under a dollar).
-
-`init_db.py` is first-time setup only — it drops every table. To pick up schema
-changes on a database that already holds data, apply the numbered files in
-[`database/migrations/`](database/migrations/) instead:
-
-```
-psql "$DATABASE_URL" -f database/migrations/001_add_token_usage.sql
-```
-
-<details>
-<summary><b>Pointing at a non-default database</b></summary>
-
-Every entry point resolves `DATABASE_URL` the same way: a real environment
-variable takes precedence over `.env`. Exporting it once therefore redirects the
-whole project — schema, ingestion, pipeline, dashboard and API alike:
-
-```
-$env:DATABASE_URL = "postgresql://localhost:5432/scratch"   # cmd: set DATABASE_URL=...
-python database/init_db.py
+python database/init_db.py            # create schema + categories (drops existing tables)
 python ingestion/ingest_ticket.py --tickets data/sample_tickets.json --bans data/sample_bans.json
 ```
 
-Set it in the *same* shell for every command in the sequence. A new shell falls
-back to `.env`, and since `init_db.py` drops every table in whichever database it
-resolves, a half-redirected sequence is how you overwrite the database you meant
-to leave alone.
+### 4. Run the AI pipeline
 
-An empty value is ignored rather than obeyed — `DATABASE_URL=` falls back to
-`.env` — so a cleared variable can't turn into a broken connection string. The
-same rule is what keeps a stale empty `ANTHROPIC_API_KEY` from shadowing the
-real key in `.env`.
-
-</details>
-
-<details>
-<summary><b>Using your own PostgreSQL instead of Docker</b></summary>
-
-1. Create a database named `ticket_tech_titan`.
-2. Copy `.env.example` to `.env` and set `DATABASE_URL` to your instance plus your `ANTHROPIC_API_KEY`.
-3. Create and activate a virtual environment, then `pip install -r requirements.txt`.
-4. Continue from `python database/init_db.py` above.
-
-</details>
-
-<details>
-<summary><b>Using other models</b></summary>
-
-The pipeline runs on any provider that speaks the OpenAI chat-completions API,
-not just Claude. In `.env`:
-
-1. Set `LLM_PROVIDER=openai`.
-2. Put that provider's key in `OPENAI_API_KEY` (a local Ollama accepts any placeholder).
-3. Set `MODEL_NAME` to one of its models from the provider's docs. Outside Anthropic there is no default.
-4. For anything but OpenAI itself, set `LLM_BASE_URL`:
-
-| Provider | `LLM_BASE_URL` |
-|---|---|
-| OpenAI | *(leave unset)* |
-| Gemini | `https://generativelanguage.googleapis.com/v1beta/openai/` |
-| Groq | `https://api.groq.com/openai/v1` |
-| Ollama (local) | `http://localhost:11434/v1` |
-
-Check the key and model with one cheap call before a full run:
-
-```
-python scripts/smoke_client.py --provider openai --model <model-name>
+```bash
+python evaluation/run_pipeline.py --limit 5     # ~5 cents of API spend
 ```
 
-Things to know:
+Drop `--limit 5` to evaluate all 50 sample tickets (well under a dollar). Re-running is safe; evaluations are replaced, not duplicated.
 
-- **The prompts were tuned against Claude**, so results may vary by model. The
-  safety net doesn't: every reply goes through the same schema validation and
-  auto-deny rules, and one that fails validation is logged and leaves the
-  ticket unevaluated rather than writing a bad row.
-- **Reasoning models need a bigger reply budget.** Models that reason before
-  answering (e.g. OpenAI's o-series and GPT-5 models, or Gemini's thinking
-  models) spend part of the budget on hidden reasoning, and the default 1,024
-  tokens can run out first: the reply comes back empty with
-  `Finish reason: length`, or cut off mid-JSON. Set `LLM_MAX_TOKENS` higher
-  (8000 is a generous start) or pick a non-reasoning model. The budget is a
-  ceiling, not a charge: you're billed for the tokens actually used,
-  reasoning included.
-- **Pricing.** The Costs view prices the models listed in
-  [`settings.py`](config/settings.py), which today means Anthropic's. For
-  anything else, set `PRICE_PER_MTOK_INPUT` and `PRICE_PER_MTOK_OUTPUT` from
-  your provider's pricing page (both `0` for a local model). Without them the
-  tokens are still recorded and shown with an unknown price, never as $0.00.
-  Providers that discount cached prompt tokens automatically (OpenAI does) bill
-  less than the full rate the view applies.
+### 5. Open the dashboard
 
-</details>
-
-## Key design decisions
-
-- **The LLM proposes; deterministic rules dispose.** [`auto_deny.py`](evaluation/auto_deny.py) overrides the model's category to Auto-Deny whenever the ban record carries a confirmed technical detection (cheat-engine signature, aim-lock, speed-hack, connection manipulation) — a persuasive appeal can never talk a confirmed cheater out of a ban, no matter what the model says.
-- **Model output is untrusted input.** Every response is parsed and schema-validated in [`evaluator.py`](evaluation/evaluator.py) — required fields, category whitelist, strict booleans, confidence range — before anything touches the database. Malformed output marks the ticket for review; it never corrupts a row.
-- **Idempotent by construction.** Evaluations UPSERT on `ticket_id` ([`writer.py`](evaluation/writer.py)) and the pipeline commits per ticket, so re-runs are safe, re-evaluations replace rather than duplicate, and one bad ticket can't poison a batch.
-- **Cost is measured, not asserted.** Every evaluation records the token counts the API billed for ([`client.py`](evaluation/client.py)); dollars are computed at query time from a price table in [`settings.py`](config/settings.py), so correcting a price re-prices all history without re-running the pipeline. Evaluations with no recorded usage are labelled untracked rather than counted as $0.00 — the return-on-investment claim is only worth making if the number behind it is honest.
-- **One seam to the model.** Everything goes through `call_model()` in [`client.py`](evaluation/client.py). A small adapter per API family — Anthropic, and OpenAI-compatible for OpenAI, Gemini, Groq and Ollama — translates the request and normalizes token usage, so validation, the auto-deny rules, and cost tracking work the same whichever model answers.
-- **Offline-testable layering.** 113 tests run with no database or API key — the DB layer, LLM client, and orchestration are all mockable seams. Integration tests exist but are opt-in (`pytest -m integration`).
-
-## Performance
-
-Sequential throughput is **~6.2 s/ticket**, almost entirely API-bound (one synchronous LLM call per ticket); the database layer answers every dashboard query in **32–45 ms with 550 tickets** loaded. Per-ticket commits make the pipeline embarrassingly parallel when throughput matters. Full methodology and numbers: [docs/performance-notes.md](docs/performance-notes.md).
-
-## Running the dashboard
-
-```
+```bash
 uvicorn api.main:app
 ```
 
-Opens at http://localhost:8000 (or run `scripts\run_api.cmd` on Windows). One
-FastAPI process serves both the JSON API and the static front-end in `web/`, so
-there are no CORS concerns and nothing to build — the front-end is plain
-HTML/CSS/JS.
-
-The dashboard is a single-page app with four views:
+Then visit http://localhost:8000. One FastAPI process serves both the JSON API and the plain HTML/CSS/JS front-end, so there's nothing to build.
 
 | View | Purpose |
 |------|---------|
-| Dashboard | Summary metrics — open tickets, auto-denies today, needs-review backlog |
-| Queue | Ticket table filtered by AI category, status, submission date, confidence, and admitted cheating; click any ticket to read the full appeal, ban record, and AI evaluation, and update its status |
+| Dashboard | Summary metrics: open tickets, auto-denies today, needs-review backlog |
+| Queue | Ticket table filtered by AI category, status, submission date, confidence, and admitted cheating; click a ticket to read the appeal, ban record, and AI evaluation, and update its status |
 | Analytics | Category breakdown, admission rates, detection methods, volume over time, and confidence distribution |
 | Costs | LLM spend per ticket and per day, cumulative spend, spend by model, and API spend against the analyst time it displaced |
 
-Use the **Refresh data** button to re-fetch the latest DB state, and the
-sun/moon button to switch between light and dark themes (the choice persists in
-`localStorage`; with no stored choice it follows the OS setting).
+<p align="right"><a href="#readme-top">↑ Back to top</a></p>
 
-### API endpoints
+## Running tests
 
-`dashboard/db.py` is the seam — the API is a thin JSON wrapper over it.
+The unit suite runs fully offline — no database, no API key, no `.env`:
+
+```bash
+pytest                              # unit tests
+pytest -m integration               # integration tests (live PostgreSQL; one test makes 2 API calls)
+pytest --cov=evaluation --cov=ingestion --cov=config --cov=dashboard --cov=api --cov-report=term-missing
+node --test "tests/js/*.test.js"    # front-end queue-filter tests (Node 22+, nothing to install)
+```
+
+<p align="right"><a href="#readme-top">↑ Back to top</a></p>
+
+## Configuration
+
+All settings live in `.env` (see [`.env.example`](.env.example)):
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `ANTHROPIC_API_KEY` | Your Anthropic API key |
+| `MODEL_NAME` | Model used for evaluation (default `claude-sonnet-4-6`) |
+| `PRICE_PER_MTOK_INPUT` / `PRICE_PER_MTOK_OUTPUT` | Optional USD-per-million-token prices for a model not in the built-in price table |
+
+A real environment variable takes precedence over `.env`, so you can point a single shell at a different database:
+
+```bash
+export DATABASE_URL=postgresql://localhost:5432/scratch
+```
+
+Keep that in mind before running `init_db.py`, which drops every table in whichever database it resolves.
+
+**Using your own PostgreSQL:** create a database named `ticket_tech_titan`, set `DATABASE_URL` to point at it, and continue from step 3 without `docker compose`.
+
+**Upgrading an existing database:** `init_db.py` is for first-time setup only. To pick up schema changes without losing data, apply the numbered files in [`database/migrations/`](database/migrations/):
+
+```bash
+psql "$DATABASE_URL" -f database/migrations/001_add_token_usage.sql
+```
+
+<p align="right"><a href="#readme-top">↑ Back to top</a></p>
+
+## API reference
+
+`dashboard/db.py` holds every query; the API is a thin JSON wrapper over it.
 
 | Endpoint | Returns |
 |---|---|
@@ -229,20 +218,22 @@ sun/moon button to switch between light and dark themes (the choice persists in
 | `GET /api/tickets/{id}/evaluation` | `ai_summary` and `ai_reasoning` for a ticket (404 when unevaluated) |
 | `PATCH /api/tickets/{id}/status` | Body `{"status": "open"\|"pending"\|"closed"}`; returns old + new status, 400 on an invalid status or unknown ticket |
 | `GET /api/analytics?date_from=&date_to=` | Category breakdown, admission rates, detection-method counts, volume over time, confidence scores |
-| `GET /api/costs?date_from=&date_to=` | LLM spend per day and per model plus totals, priced at query time from the token counts stored with each evaluation |
+| `GET /api/costs?date_from=&date_to=` | LLM spend per day and per model plus totals, priced from stored token counts |
 | `GET /api/stats` | `open_count`, `auto_denied_today`, `needs_review` |
 | `GET /api/date-bounds` | Earliest and latest ticket dates |
 
-## Running tests
+<p align="right"><a href="#readme-top">↑ Back to top</a></p>
 
-117 Python tests: 113 unit tests that run fully offline (no DB, no API key) plus 4 integration tests gated behind a marker. The front-end's queue filters are tested separately under Node's built-in runner — Node 22+, nothing to install.
+## Design notes
 
-```
-pytest                        # unit tests only — no DB or API key required
-pytest -m integration         # integration tests (live PostgreSQL; idempotency test uses 2 API calls)
-pytest --cov=evaluation --cov=ingestion --cov=config --cov=dashboard --cov=api --cov-report=term-missing
-node --test "tests/js/*.test.js"   # front-end filter tests
-```
+- **The LLM proposes; deterministic rules decide.** [`auto_deny.py`](evaluation/auto_deny.py) forces Auto-Deny whenever the ban record carries a confirmed technical detection, so a persuasive appeal can never override hard evidence.
+- **Model output is untrusted input.** [`evaluator.py`](evaluation/evaluator.py) parses and schema-validates every response (required fields, category whitelist, strict booleans, confidence range) before anything touches the database. Malformed output is logged and the ticket is left unevaluated; it never corrupts a row.
+- **Idempotent pipeline.** Evaluations UPSERT on `ticket_id` ([`writer.py`](evaluation/writer.py)) and commit per ticket, so re-runs are safe and one bad ticket can't break a batch.
+- **Measured cost.** Each evaluation stores the token counts the API billed ([`client.py`](evaluation/client.py)). Dollars are computed at query time from the price table in [`settings.py`](config/settings.py), so a price correction re-prices all history. Evaluations without usage data show as untracked rather than $0.00.
+- **Offline-testable.** The database layer, LLM client, and orchestration are mockable seams; integration tests are opt-in via `pytest -m integration`.
+- **Performance.** Throughput is ~6.2 s/ticket, almost entirely API-bound; dashboard queries return in 32–45 ms with 550 tickets loaded. Per-ticket commits make the pipeline easy to parallelize. Details in [docs/performance-notes.md](docs/performance-notes.md).
+
+<p align="right"><a href="#readme-top">↑ Back to top</a></p>
 
 ## Project structure
 
@@ -270,7 +261,7 @@ ingestion/
 
 evaluation/
   prompts.py        System prompt + user-prompt builder
-  client.py         LLM client: Anthropic + OpenAI-compatible adapters, logged retry/backoff
+  client.py         Anthropic wrapper with logged retry/backoff
   evaluator.py      Claude-powered ticket classifier
   auto_deny.py      Deterministic override rules
   writer.py         Persist evaluations to DB
@@ -279,15 +270,15 @@ evaluation/
 analytics/          SQL analysis queries
 reference/          Industry ban-policy reference docs
 config/
-  settings.py       DB connection, LLM provider, ALLOWED_STATUSES, model price table
+  settings.py       DB connection, ALLOWED_STATUSES, model price table
 
-tests/              113 offline unit tests + 4 opt-in integration tests
+tests/              Offline unit tests + opt-in integration tests
   js/               Node tests for web/filters.js
 scripts/
   run_api.cmd          Launch the API + dashboard on Windows
   generate_tickets.py  Synthetic ticket/ban generator for perf testing
   capture_screenshots.py  Regenerates the README screenshots
-  smoke_client.py      Manual live-API smoke test (--provider / --model to try another key)
+  smoke_client.py      Manual live-API smoke test
   smoke_evaluate.py    Manual end-to-end evaluation spot-check
 docs/
   performance-notes.md Performance baseline + scaling analysis
@@ -296,3 +287,5 @@ docs/
                        system generated with Claude Design: prototype, tokens,
                        and rendered references for both themes
 ```
+
+<p align="right"><a href="#readme-top">↑ Back to top</a></p>
