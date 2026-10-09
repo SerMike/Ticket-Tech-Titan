@@ -154,13 +154,14 @@ FastAPI process serves both the JSON API and the static front-end in `web/`, so
 there are no CORS concerns and nothing to build — the front-end is plain
 HTML/CSS/JS.
 
-The dashboard is a single-page app with three views:
+The dashboard is a single-page app with four views:
 
 | View | Purpose |
 |------|---------|
 | Dashboard | Summary metrics — open tickets, auto-denies today, needs-review backlog |
-| Queue | Filterable ticket table; click any ticket to read the full appeal, ban record, and AI evaluation, and update its status |
+| Queue | Ticket table filtered by AI category, status, submission date, confidence, and admitted cheating; click any ticket to read the full appeal, ban record, and AI evaluation, and update its status |
 | Analytics | Category breakdown, admission rates, detection methods, volume over time, and confidence distribution |
+| Costs | LLM spend per ticket and per day, cumulative spend, spend by model, and API spend against the analyst time it displaced |
 
 Use the **Refresh data** button to re-fetch the latest DB state, and the
 sun/moon button to switch between light and dark themes (the choice persists in
@@ -183,12 +184,13 @@ sun/moon button to switch between light and dark themes (the choice persists in
 
 ## Running tests
 
-98 tests: 94 unit tests that run fully offline (no DB, no API key) plus 4 integration tests gated behind a marker.
+98 Python tests: 94 unit tests that run fully offline (no DB, no API key) plus 4 integration tests gated behind a marker. The front-end's queue filters are tested separately under Node's built-in runner — Node 22+, nothing to install.
 
 ```
 pytest                        # unit tests only — no DB or API key required
 pytest -m integration         # integration tests (live PostgreSQL; idempotency test uses 2 API calls)
 pytest --cov=evaluation --cov=ingestion --cov=config --cov=dashboard --cov=api --cov-report=term-missing
+node --test "tests/js/*.test.js"   # front-end filter tests
 ```
 
 ## Project structure
@@ -199,7 +201,8 @@ api/
 
 web/                Single-page front-end (no build step)
   index.html        Shell, theme tokens, status colors
-  app.js            State, views, filtering/aggregation, API calls
+  app.js            State, views, aggregation, API calls
+  filters.js        Queue filter predicates — DOM-free, so Node can test them
   industry-styles.css  Design-system stylesheet
 
 dashboard/
@@ -228,6 +231,7 @@ config/
   settings.py       DB connection, ALLOWED_STATUSES, model price table
 
 tests/              94 offline unit tests + 4 opt-in integration tests
+  js/               Node tests for web/filters.js
 scripts/
   run_api.cmd          Launch the API + dashboard on Windows
   generate_tickets.py  Synthetic ticket/ban generator for perf testing
