@@ -11,7 +11,7 @@
 const { describe, test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { filterQueue, dateBounds } = require('../../web/filters.js');
+const { filterQueue, dateBounds, followBound } = require('../../web/filters.js');
 
 // Rows shaped like GET /api/tickets, newest first as the API returns them.
 // T3 is unevaluated, so its AI columns are null.
@@ -106,5 +106,25 @@ describe('dateBounds', () => {
 
   test('returns empty bounds when there are no tickets', () => {
     assert.deepEqual(dateBounds([]), { min: '', max: '' });
+  });
+});
+
+// A refresh that brings in a ticket from the 5th, after a page loaded with
+// data ending on the 4th.
+describe('followBound', () => {
+  test('moves an edge that sat on the old bound', () => {
+    assert.equal(followBound('2026-06-04', '2026-06-04', '2026-06-05'), '2026-06-05');
+  });
+
+  test('leaves an edge the analyst moved', () => {
+    assert.equal(followBound('2026-06-02', '2026-06-04', '2026-06-05'), '2026-06-02');
+  });
+
+  test('leaves a cleared edge open', () => {
+    assert.equal(followBound('', '2026-06-04', '2026-06-05'), '');
+  });
+
+  test('fills in an edge set before any tickets had loaded', () => {
+    assert.equal(followBound('', '', '2026-06-05'), '2026-06-05');
   });
 });

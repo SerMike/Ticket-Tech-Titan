@@ -198,8 +198,15 @@ async function refreshData() {
   try {
     const tickets = await fetchTickets();
     const stillThere = tickets.some((t) => t.ticket_id === state.selectedId);
+    // Ranges left spanning all the data keep spanning it, so tickets from a
+    // newer day show up instead of landing just past the To date.
+    const was = dateBounds(state.tickets), now = dateBounds(tickets);
     setState({
       tickets,
+      dateFrom: followBound(state.dateFrom, was.min, now.min),
+      dateTo: followBound(state.dateTo, was.max, now.max),
+      queueDateFrom: followBound(state.queueDateFrom, was.min, now.min),
+      queueDateTo: followBound(state.queueDateTo, was.max, now.max),
       evaluations: {},
       costRangeKey: null,  // invalidate so the cost view re-pulls
       selectedId: stillThere ? state.selectedId : (tickets[0] ? tickets[0].ticket_id : null),

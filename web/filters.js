@@ -28,6 +28,13 @@ function dateBounds(tickets) {
   return { min: dates[0] || '', max: dates[dates.length - 1] || '' };
 }
 
+// Where a date-range edge belongs after a refresh. An edge sitting on the old
+// data bound means "everything", so it moves with the bound and newly arrived
+// tickets show up; an edge the analyst moved stays where they put it.
+function followBound(edge, oldBound, newBound) {
+  return edge === oldBound ? newBound : edge;
+}
+
 // The queue's filter rail applied to the full ticket list. `f` holds the
 // rail's state: `cats` and `statuses` as {label: checked} maps, the
 // confMin/confMax window, `admittedOnly`, and the dateFrom/dateTo range.
@@ -45,5 +52,5 @@ function filterQueue(tickets, f) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { inDateRange, dateBounds, filterQueue };
+  module.exports = { inDateRange, dateBounds, followBound, filterQueue };
 }
