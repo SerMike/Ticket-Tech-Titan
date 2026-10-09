@@ -1,10 +1,10 @@
 """capture_screenshots.py — Full-page README screenshots of the dashboard.
 
-The dashboard is a single-page app: the three views are swapped
+The dashboard is a single-page app: the four views are swapped
 client-side rather than served at their own URLs, so this script drives
 the nav the way a user would, then takes a full-page screenshot of each.
-Captures queue.png and analytics.png in dark mode, plus dashboard-light.png
-so the README shows both themes. Theme follows prefers-color-scheme when
+Captures queue.png, analytics.png and costs.png in dark mode, plus
+dashboard-light.png so the README shows both themes. Theme follows prefers-color-scheme when
 localStorage holds no choice, which is why each theme gets its own context.
 
 Requires the API running on localhost:8000 (``uvicorn api.main:app``)
