@@ -155,10 +155,9 @@ def evaluate_ticket(ticket: dict, ban_record: dict | None) -> dict:
     # Step 1: Build the user-message body from the ticket + ban record.
     user_prompt = build_user_prompt(ticket, ban_record)
 
-    # Step 2: Call the model. Errors from the API bubble up intentionally.
-    response = call_model(
-        system=SYSTEM_PROMPT, user=user_prompt, max_tokens=1024
-    )
+    # Step 2: Call the model, with the reply budget LLM_MAX_TOKENS sets.
+    # Errors from the API bubble up intentionally.
+    response = call_model(system=SYSTEM_PROMPT, user=user_prompt)
     raw_response = response.text
 
     # Step 3: Parse JSON. Log the raw response on failure for debugging.

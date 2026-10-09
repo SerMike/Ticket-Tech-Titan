@@ -48,6 +48,31 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 LLM_BASE_URL = os.getenv("LLM_BASE_URL") or None
 
+
+def _token_budget(raw: str | None) -> int:
+    """Parse LLM_MAX_TOKENS: a positive whole number, 1024 when unset.
+
+    A bad value fails here, naming the variable, rather than as a provider
+    error on every ticket.
+    """
+    if not raw:
+        return 1024
+    try:
+        budget = int(raw)
+    except ValueError:
+        budget = 0
+    if budget < 1:
+        raise RuntimeError(
+            f"LLM_MAX_TOKENS must be a positive whole number of tokens, got {raw!r}."
+        )
+    return budget
+
+
+# Token budget for each model reply. 1024 is ample for the evaluation JSON,
+# but reasoning models spend part of the budget on hidden reasoning before
+# they answer, so they need more; see "Using other models" in the README.
+LLM_MAX_TOKENS = _token_budget(os.getenv("LLM_MAX_TOKENS"))
+
 # LLM pricing — USD per million tokens, as (input, output), keyed by model.
 #
 # Cost is computed from these at query time rather than stored, so correcting a

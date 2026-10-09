@@ -163,10 +163,14 @@ Things to know:
   safety net doesn't: every reply goes through the same schema validation and
   auto-deny rules, and one that fails validation is logged and leaves the
   ticket unevaluated rather than writing a bad row.
-- **Prefer non-reasoning models.** Reasoning models (e.g. OpenAI's o-series and
-  GPT-5 models, or Gemini's thinking models) spend part of the 1,024-token output
-  budget on hidden reasoning. When it runs out the reply comes back empty and
-  the error says `Finish reason: length`.
+- **Reasoning models need a bigger reply budget.** Models that reason before
+  answering (e.g. OpenAI's o-series and GPT-5 models, or Gemini's thinking
+  models) spend part of the budget on hidden reasoning, and the default 1,024
+  tokens can run out first: the reply comes back empty with
+  `Finish reason: length`, or cut off mid-JSON. Set `LLM_MAX_TOKENS` higher
+  (8000 is a generous start) or pick a non-reasoning model. The budget is a
+  ceiling, not a charge: you're billed for the tokens actually used,
+  reasoning included.
 - **Pricing.** The Costs view prices the models listed in
   [`settings.py`](config/settings.py), which today means Anthropic's. For
   anything else, set `PRICE_PER_MTOK_INPUT` and `PRICE_PER_MTOK_OUTPUT` from
@@ -184,7 +188,7 @@ Things to know:
 - **Idempotent by construction.** Evaluations UPSERT on `ticket_id` ([`writer.py`](evaluation/writer.py)) and the pipeline commits per ticket, so re-runs are safe, re-evaluations replace rather than duplicate, and one bad ticket can't poison a batch.
 - **Cost is measured, not asserted.** Every evaluation records the token counts the API billed for ([`client.py`](evaluation/client.py)); dollars are computed at query time from a price table in [`settings.py`](config/settings.py), so correcting a price re-prices all history without re-running the pipeline. Evaluations with no recorded usage are labelled untracked rather than counted as $0.00 — the return-on-investment claim is only worth making if the number behind it is honest.
 - **One seam to the model.** Everything goes through `call_model()` in [`client.py`](evaluation/client.py). A small adapter per API family — Anthropic, and OpenAI-compatible for OpenAI, Gemini, Groq and Ollama — translates the request and normalizes token usage, so validation, the auto-deny rules, and cost tracking work the same whichever model answers.
-- **Offline-testable layering.** 106 tests run with no database or API key — the DB layer, LLM client, and orchestration are all mockable seams. Integration tests exist but are opt-in (`pytest -m integration`).
+- **Offline-testable layering.** 113 tests run with no database or API key — the DB layer, LLM client, and orchestration are all mockable seams. Integration tests exist but are opt-in (`pytest -m integration`).
 
 ## Performance
 
@@ -231,7 +235,7 @@ sun/moon button to switch between light and dark themes (the choice persists in
 
 ## Running tests
 
-110 Python tests: 106 unit tests that run fully offline (no DB, no API key) plus 4 integration tests gated behind a marker. The front-end's queue filters are tested separately under Node's built-in runner — Node 22+, nothing to install.
+117 Python tests: 113 unit tests that run fully offline (no DB, no API key) plus 4 integration tests gated behind a marker. The front-end's queue filters are tested separately under Node's built-in runner — Node 22+, nothing to install.
 
 ```
 pytest                        # unit tests only — no DB or API key required
@@ -277,7 +281,7 @@ reference/          Industry ban-policy reference docs
 config/
   settings.py       DB connection, LLM provider, ALLOWED_STATUSES, model price table
 
-tests/              106 offline unit tests + 4 opt-in integration tests
+tests/              113 offline unit tests + 4 opt-in integration tests
   js/               Node tests for web/filters.js
 scripts/
   run_api.cmd          Launch the API + dashboard on Windows

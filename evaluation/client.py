@@ -197,6 +197,7 @@ class OpenAICompatProvider:
             # Not max_tokens, which OpenAI's reasoning models reject. Those
             # models also spend this budget on hidden reasoning, so a reply
             # that runs out comes back empty with finish_reason "length".
+            # LLM_MAX_TOKENS sets the budget.
             max_completion_tokens=max_tokens,
         )
 
@@ -205,8 +206,9 @@ class OpenAICompatProvider:
         if not text:
             reason = choice.finish_reason if choice else None
             hint = (
-                " — the model used its whole output budget, which reasoning"
-                " models can spend on hidden reasoning; try a non-reasoning model"
+                f" — the model used its whole {max_tokens}-token budget, which"
+                " reasoning models can spend on hidden reasoning; raise"
+                " LLM_MAX_TOKENS or try a non-reasoning model"
                 if reason == "length" else ""
             )
             raise RuntimeError(
@@ -263,7 +265,7 @@ def _backoff_seconds(attempt: int) -> float:
     return random.uniform(0.0, ceiling)
 
 
-def call_model(system: str, user: str, max_tokens: int = 1024) -> ModelResponse:
+def call_model(system: str, user: str, max_tokens: int | None = None) -> ModelResponse:
     """Send a single (system, user) message pair to the configured model.
 
     Retries transient failures (rate limits, 5xx, network timeouts) with
@@ -273,7 +275,9 @@ def call_model(system: str, user: str, max_tokens: int = 1024) -> ModelResponse:
     Args:
         system: System prompt defining the model's role and rules.
         user: User-message body — the actual prompt to evaluate.
-        max_tokens: Cap on response length. 1024 is plenty for our JSON output.
+        max_tokens: Cap on the reply, hidden reasoning included for models
+            that reason. Defaults to LLM_MAX_TOKENS (1024 unless configured),
+            plenty for our JSON output from a non-reasoning model.
 
     Returns:
         A ModelResponse carrying the raw text content plus the token counts
@@ -288,6 +292,8 @@ def call_model(system: str, user: str, max_tokens: int = 1024) -> ModelResponse:
         this call in their own try/except.
     """
     provider = get_provider()
+    if max_tokens is None:
+        max_tokens = settings.LLM_MAX_TOKENS
 
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:

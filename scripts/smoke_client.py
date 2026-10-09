@@ -10,7 +10,9 @@ Run directly:
     python scripts/smoke_client.py --provider openai --model gpt-4.1-mini
 
 --provider and --model override LLM_PROVIDER and MODEL_NAME for this run
-only; keys and LLM_BASE_URL still come from .env.
+only; keys, LLM_BASE_URL and LLM_MAX_TOKENS still come from .env. The reply
+budget is the pipeline's own, so a reasoning model that passes here has room
+to run there too.
 """
 
 import argparse
@@ -42,13 +44,13 @@ def main() -> int:
     target = settings.LLM_PROVIDER
     if settings.LLM_BASE_URL and target != "anthropic":
         target += f" at {settings.LLM_BASE_URL}"
-    print(f"Calling {settings.MODEL_NAME} via {target}...")
+    print(f"Calling {settings.MODEL_NAME} via {target} "
+          f"(reply budget {settings.LLM_MAX_TOKENS} tokens)...")
 
     try:
         response = call_model(
             system="You are a helpful assistant. Reply with a single short sentence.",
             user="Say hello.",
-            max_tokens=64,
         )
     except Exception as exc:  # noqa: BLE001
         print(f"ERROR - {type(exc).__name__}: {exc}")

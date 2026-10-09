@@ -182,12 +182,15 @@ def test_openai_without_usage_is_untracked_not_zero():
     assert (result.input_tokens, result.output_tokens) == (None, None)
 
 
-def test_openai_empty_reply_names_the_finish_reason():
+def test_openai_empty_reply_names_the_finish_reason_and_the_fix():
     create = Mock(return_value=_completion(None, finish_reason="length"))
 
     with _via(_openai(create)):
-        with pytest.raises(RuntimeError, match="no text content. Finish reason: length.*reasoning"):
-            client.call_model("system", "user")
+        with pytest.raises(
+            RuntimeError,
+            match=r"Finish reason: length — the model used its whole 512-token budget.*raise LLM_MAX_TOKENS",
+        ):
+            client.call_model("system", "user", max_tokens=512)
 
 
 def test_openai_retries_rate_limits_and_server_errors(monkeypatch):
@@ -204,6 +207,22 @@ def test_openai_retries_rate_limits_and_server_errors(monkeypatch):
 
     assert result.text == "recovered"
     assert create.call_count == 4
+
+
+@pytest.mark.parametrize("make_provider, reply, budget_kwarg", [
+    (_anthropic, _response("ok"), "max_tokens"),
+    (_openai, _completion("ok"), "max_completion_tokens"),
+])
+def test_reply_budget_defaults_to_llm_max_tokens(monkeypatch, make_provider, reply, budget_kwarg):
+    # Callers that don't pass max_tokens (the evaluator, the smoke script)
+    # get the configured budget, read per call so a changed setting applies.
+    monkeypatch.setattr(settings, "LLM_MAX_TOKENS", 8000)
+    create = Mock(return_value=reply)
+
+    with _via(make_provider(create)):
+        client.call_model("system", "user")
+
+    assert create.call_args.kwargs[budget_kwarg] == 8000
 
 
 def test_openai_does_not_retry_a_bad_request(monkeypatch):
@@ -230,6 +249,18 @@ def test_unset_provider_means_anthropic_with_its_default_model():
 def test_other_providers_get_no_default_model():
     assert settings._llm_choice(" OpenAI ", None) == ("openai", None)
     assert settings._llm_choice("openai", "gpt-test") == ("openai", "gpt-test")
+
+
+def test_reply_budget_is_1024_unless_set():
+    assert settings._token_budget(None) == 1024
+    assert settings._token_budget("") == 1024
+    assert settings._token_budget("8000") == 8000
+
+
+@pytest.mark.parametrize("raw", ["8k", "0", "-5", "1.5"])
+def test_reply_budget_must_be_a_positive_whole_number(raw):
+    with pytest.raises(RuntimeError, match="LLM_MAX_TOKENS must be a positive whole number"):
+        settings._token_budget(raw)
 
 
 def test_openai_provider_builds_its_client_from_settings(monkeypatch):
