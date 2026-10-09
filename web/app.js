@@ -26,6 +26,10 @@ const state = {
   cats: { 'Auto-Deny': true, 'Likely Legitimate': true, 'Admitted to Cheating': true, 'Templated/Bot Appeal': true, 'Needs Review': true, 'Not yet evaluated': true },
   statuses: { open: true, pending: true, closed: true },
   confMin: 0, confMax: 1, admittedOnly: false,
+  // The queue's own submission-date range, separate from the dateFrom/dateTo
+  // that Analytics and Costs share: narrowing a chart shouldn't quietly hide
+  // tickets from the work queue.
+  queueDateFrom: '', queueDateTo: '',
   selectedId: null, showReasoning: false,
   dateFrom: '', dateTo: '', aggTab: 'Categories',
   toastText: '', toastVisible: false,
@@ -181,11 +185,11 @@ async function ensureCosts() {
 
 async function loadInitial() {
   const tickets = await fetchTickets();
-  const dates = tickets.map((t) => t.created_at.slice(0, 10)).sort();
+  const b = dateBounds(tickets);
   setState({
     tickets,
-    dateFrom: dates[0] || '',
-    dateTo: dates[dates.length - 1] || '',
+    dateFrom: b.min, dateTo: b.max,
+    queueDateFrom: b.min, queueDateTo: b.max,
     selectedId: tickets[0] ? tickets[0].ticket_id : null,
   });
 }
@@ -240,15 +244,12 @@ function filteredQueue() {
   return filterQueue(s.tickets, {
     cats: s.cats, statuses: s.statuses,
     confMin: s.confMin, confMax: s.confMax, admittedOnly: s.admittedOnly,
+    dateFrom: s.queueDateFrom, dateTo: s.queueDateTo,
   });
 }
 
 function analyticsSet() {
-  const s = state;
-  return s.tickets.filter((t) => {
-    const d = t.created_at.slice(0, 10);
-    return (!s.dateFrom || d >= s.dateFrom) && (!s.dateTo || d <= s.dateTo);
-  });
+  return state.tickets.filter((t) => inDateRange(t, state.dateFrom, state.dateTo));
 }
 
 // ---------------------------------------------------------------------------
@@ -322,12 +323,23 @@ function renderQueue() {
   const catFilters = Object.keys(s.cats).map((label) => ({ label, checked: s.cats[label] }));
   const statusFilters = Object.keys(s.statuses).map((label) => ({ label, checked: s.statuses[label] }));
 
+  // Same .field date inputs as Analytics, stacked to fit the rail. No min/max:
+  // Chromium greys out any date segment they pin to one value, which reads as
+  // disabled next to the Analytics inputs.
+  const dateField = (label, value, action) => '<div class="field"><label>' + label + '</label>'
+    + '<input type="date" class="input" value="' + esc(value) + '" data-action="' + action + '"'
+    + ' aria-label="Submitted ' + label.toLowerCase() + '"></div>';
+
   const rail = '<aside class="blueprint" style="padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-4); position: sticky; top: 20px;">' + CORNERS
     + '<h6 style="margin: 0;">Filters</h6>'
     + '<div><div style="font-size: 12px; margin-bottom: 6px; color: color-mix(in srgb, var(--color-text) 70%, transparent);">AI category</div>'
     + '<div style="display: flex; flex-direction: column; gap: 5px;">' + checkboxList(catFilters, 'cat-filter') + '</div></div>'
     + '<div><div style="font-size: 12px; margin-bottom: 6px; color: color-mix(in srgb, var(--color-text) 70%, transparent);">Status</div>'
     + '<div style="display: flex; flex-direction: column; gap: 5px;">' + checkboxList(statusFilters, 'status-filter') + '</div></div>'
+    + '<div><div style="font-size: 12px; margin-bottom: 6px; color: color-mix(in srgb, var(--color-text) 70%, transparent);">Submitted</div>'
+    + '<div style="display: flex; flex-direction: column; gap: 6px;">'
+    + dateField('From', s.queueDateFrom, 'queue-date-from') + dateField('To', s.queueDateTo, 'queue-date-to')
+    + '</div></div>'
     + '<div><div style="font-size: 12px; margin-bottom: 6px; color: color-mix(in srgb, var(--color-text) 70%, transparent);">Confidence score · ' + s.confMin.toFixed(2) + ' – ' + s.confMax.toFixed(2) + '</div>'
     + '<div style="display: flex; flex-direction: column; gap: 6px;">'
     + '<input type="range" min="0" max="1" step="0.05" value="' + s.confMin + '" data-action="conf-min" style="accent-color: var(--color-accent); width: 100%;">'
@@ -748,6 +760,8 @@ document.getElementById('app').addEventListener('change', (e) => {
   else if (action === 'conf-min') setState({ confMin: Math.min(parseFloat(el.value), state.confMax) });
   else if (action === 'conf-max') setState({ confMax: Math.max(parseFloat(el.value), state.confMin) });
   else if (action === 'admitted-only') setState({ admittedOnly: !state.admittedOnly });
+  else if (action === 'queue-date-from') setState({ queueDateFrom: el.value });
+  else if (action === 'queue-date-to') setState({ queueDateTo: el.value });
   else if (action === 'status-select') changeStatus(state.selectedId, el.value);
   else if (action === 'date-from') setState({ dateFrom: el.value });
   else if (action === 'date-to') setState({ dateTo: el.value });

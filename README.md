@@ -159,7 +159,7 @@ The dashboard is a single-page app with four views:
 | View | Purpose |
 |------|---------|
 | Dashboard | Summary metrics — open tickets, auto-denies today, needs-review backlog |
-| Queue | Filterable ticket table; click any ticket to read the full appeal, ban record, and AI evaluation, and update its status |
+| Queue | Ticket table filtered by AI category, status, submission date, and confidence; click any ticket to read the full appeal, ban record, and AI evaluation, and update its status |
 | Analytics | Category breakdown, admission rates, detection methods, volume over time, and confidence distribution |
 | Costs | LLM spend per ticket and per day, cumulative spend, spend by model, and API spend against the analyst time it displaced |
 

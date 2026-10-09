@@ -11,7 +11,7 @@
 const { describe, test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { filterQueue } = require('../../web/filters.js');
+const { filterQueue, dateBounds } = require('../../web/filters.js');
 
 // Rows shaped like GET /api/tickets, newest first as the API returns them.
 // T3 is unevaluated, so its AI columns are null.
@@ -22,8 +22,8 @@ const TICKETS = [
   { ticket_id: 'T1', status: 'open', created_at: '2026-06-01T08:15:00', ai_category: 'Auto-Deny', confidence_score: 0.95, admitted_cheating: false },
 ];
 
-// The rail as the page loads it: every box ticked and the full confidence
-// window.
+// The rail with nothing filtered out: every box ticked, the full confidence
+// window, no date bounds.
 function rail(overrides) {
   return Object.assign({
     cats: { 'Auto-Deny': true, 'Likely Legitimate': true, 'Admitted to Cheating': true, 'Templated/Bot Appeal': true, 'Needs Review': true, 'Not yet evaluated': true },
@@ -31,6 +31,8 @@ function rail(overrides) {
     confMin: 0,
     confMax: 1,
     admittedOnly: false,
+    dateFrom: '',
+    dateTo: '',
   }, overrides);
 }
 
@@ -65,5 +67,44 @@ describe('filterQueue', () => {
   test('keeps only confirmed admissions when admittedOnly is set', () => {
     // T3's null means "not evaluated", which is not an admission.
     assert.deepEqual(ids(filterQueue(TICKETS, rail({ admittedOnly: true }))), ['T4']);
+  });
+
+  test('scopes to the date range, including both end days whatever the time', () => {
+    // T2 lands a second before midnight on the 2nd, T3 at midnight on the 3rd.
+    const f = rail({ dateFrom: '2026-06-02', dateTo: '2026-06-03' });
+    assert.deepEqual(ids(filterQueue(TICKETS, f)), ['T3', 'T2']);
+  });
+
+  test('treats an empty date bound as open', () => {
+    assert.deepEqual(ids(filterQueue(TICKETS, rail({ dateFrom: '2026-06-03' }))), ['T4', 'T3']);
+    assert.deepEqual(ids(filterQueue(TICKETS, rail({ dateTo: '2026-06-01' }))), ['T1']);
+  });
+
+  test('composes the date range with the other filters', () => {
+    // The range alone keeps T2-T4; the status filter then drops T4 and the
+    // category filter drops T3.
+    const f = rail({
+      dateFrom: '2026-06-02',
+      dateTo: '2026-06-04',
+      statuses: { open: true, pending: true, closed: false },
+      cats: Object.assign({}, rail().cats, { 'Not yet evaluated': false }),
+    });
+    assert.deepEqual(ids(filterQueue(TICKETS, f)), ['T2']);
+  });
+
+  test('returns nothing for an inverted date range', () => {
+    assert.deepEqual(filterQueue(TICKETS, rail({ dateFrom: '2026-06-04', dateTo: '2026-06-01' })), []);
+  });
+});
+
+describe('dateBounds', () => {
+  test('finds the earliest and latest submission dates whatever the order', () => {
+    const expected = { min: '2026-06-01', max: '2026-06-04' };
+    assert.deepEqual(dateBounds(TICKETS), expected);
+    assert.deepEqual(dateBounds(TICKETS.slice().reverse()), expected);
+  });
+
+  test('returns empty bounds when there are no tickets', () => {
+    assert.deepEqual(dateBounds([]), { min: '', max: '' });
   });
 });
