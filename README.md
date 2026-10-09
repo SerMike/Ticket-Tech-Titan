@@ -59,7 +59,7 @@ flowchart TD
     I --> ST[("support_tickets")]
     I --> BD[("ban_database")]
     subgraph PIPE["Evaluation pipeline (run_pipeline.py)"]
-        EV["LLM evaluation<br/>claude-sonnet-4-6<br/>(evaluator.py)"] --> AD["Auto-deny override<br/>deterministic safety net<br/>(auto_deny.py)"]
+        EV["LLM evaluation<br/>claude-sonnet-4-6 by default<br/>(evaluator.py)"] --> AD["Auto-deny override<br/>deterministic safety net<br/>(auto_deny.py)"]
         AD --> WR["Schema-validated UPSERT<br/>(writer.py)"]
     end
     ST -->|"LEFT JOIN on user_id"| EV
@@ -106,7 +106,7 @@ flowchart TD
 
 - Python 3.11+
 - Docker (or your own PostgreSQL 16 — see [Configuration](#configuration))
-- An [Anthropic API key](https://console.anthropic.com/)
+- An [Anthropic API key](https://console.anthropic.com/), or a key for OpenAI, Gemini or Groq, or a local Ollama model (see [Using other models](#using-other-models))
 - Node 22+ *(optional, only for the front-end tests)*
 
 ### 1. Install
@@ -131,6 +131,8 @@ Edit `.env` and set:
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ticket_tech_titan
 ANTHROPIC_API_KEY=sk-ant-...
 ```
+
+Using a different provider? Set the variables in [Using other models](#using-other-models) instead of `ANTHROPIC_API_KEY`.
 
 ### 3. Start the database and load sample data
 
@@ -185,8 +187,12 @@ All settings live in `.env` (see [`.env.example`](.env.example)):
 | Variable | Purpose |
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string |
+| `LLM_PROVIDER` | `anthropic` (default) or `openai`; see [Using other models](#using-other-models) |
 | `ANTHROPIC_API_KEY` | Your Anthropic API key |
-| `MODEL_NAME` | Model used for evaluation (default `claude-sonnet-4-6`) |
+| `OPENAI_API_KEY` | Your key for an OpenAI-compatible provider, when `LLM_PROVIDER=openai` |
+| `LLM_BASE_URL` | Endpoint of an OpenAI-compatible provider other than OpenAI itself |
+| `MODEL_NAME` | Model used for evaluation (default `claude-sonnet-4-6`; required for other providers) |
+| `LLM_MAX_TOKENS` | Reply budget per evaluation (default `1024`); raise it for reasoning models |
 | `PRICE_PER_MTOK_INPUT` / `PRICE_PER_MTOK_OUTPUT` | Optional USD-per-million-token prices for a model not in the built-in price table |
 
 A real environment variable takes precedence over `.env`, so you can point a single shell at a different database:
@@ -204,6 +210,35 @@ Keep that in mind before running `init_db.py`, which drops every table in whiche
 ```bash
 psql "$DATABASE_URL" -f database/migrations/001_add_token_usage.sql
 ```
+
+### Using other models
+
+Claude is the default, but the pipeline runs on any provider that speaks the OpenAI chat-completions API: OpenAI itself, or Gemini, Groq, or a local Ollama model through their OpenAI-compatible endpoints. In `.env`, set:
+
+```bash
+LLM_PROVIDER=openai
+OPENAI_API_KEY=...
+MODEL_NAME=...
+```
+
+`OPENAI_API_KEY` takes that provider's key (Ollama accepts any placeholder) and `MODEL_NAME` one of its models; there's no default model outside Anthropic. For anything but OpenAI itself, also set `LLM_BASE_URL`:
+
+| Provider | `LLM_BASE_URL` |
+|---|---|
+| OpenAI | *(leave unset)* |
+| Gemini | `https://generativelanguage.googleapis.com/v1beta/openai/` |
+| Groq | `https://api.groq.com/openai/v1` |
+| Ollama (local) | `http://localhost:11434/v1` |
+
+Check the key and model with one cheap call before a full run:
+
+```bash
+python scripts/smoke_client.py --provider openai --model <model-name>
+```
+
+- **The prompts were tuned against Claude**, so results may vary by model. Every reply still goes through the same validation and auto-deny rules.
+- **Reasoning models need a bigger reply budget.** Models that reason before answering (e.g. OpenAI's o-series and GPT-5, Gemini's thinking models) spend part of `LLM_MAX_TOKENS` on hidden reasoning. If replies come back empty with `Finish reason: length` or cut off mid-JSON, raise it (8000 is a generous start). You're billed for the tokens used, not the budget.
+- **Pricing.** The built-in price table covers Anthropic's models. For anything else, set `PRICE_PER_MTOK_INPUT` and `PRICE_PER_MTOK_OUTPUT` from your provider's pricing page (both `0` for a local model); otherwise the Costs view shows the tokens with an unknown price, never $0.00. OpenAI's automatic prompt-cache discount isn't applied, so its figures can run high.
 
 <p align="right"><a href="#readme-top">↑ Back to top</a></p>
 
@@ -228,6 +263,7 @@ psql "$DATABASE_URL" -f database/migrations/001_add_token_usage.sql
 
 - **The LLM proposes; deterministic rules decide.** [`auto_deny.py`](evaluation/auto_deny.py) forces Auto-Deny whenever the ban record carries a confirmed technical detection, so a persuasive appeal can never override hard evidence.
 - **Model output is untrusted input.** [`evaluator.py`](evaluation/evaluator.py) parses and schema-validates every response (required fields, category whitelist, strict booleans, confidence range) before anything touches the database. Malformed output is logged and the ticket is left unevaluated; it never corrupts a row.
+- **Swappable model.** Everything calls `call_model()` in [`client.py`](evaluation/client.py), where one adapter per API family (Anthropic, or OpenAI-compatible) translates the request and normalizes token usage. Validation, the auto-deny rules, and cost tracking don't change with the model.
 - **Idempotent pipeline.** Evaluations UPSERT on `ticket_id` ([`writer.py`](evaluation/writer.py)) and commit per ticket, so re-runs are safe and one bad ticket can't break a batch.
 - **Measured cost.** Each evaluation stores the token counts the API billed ([`client.py`](evaluation/client.py)). Dollars are computed at query time from the price table in [`settings.py`](config/settings.py), so a price correction re-prices all history. Evaluations without usage data show as untracked rather than $0.00.
 - **Offline-testable.** The database layer, LLM client, and orchestration are mockable seams; integration tests are opt-in via `pytest -m integration`.
@@ -261,7 +297,7 @@ ingestion/
 
 evaluation/
   prompts.py        System prompt + user-prompt builder
-  client.py         Anthropic wrapper with logged retry/backoff
+  client.py         LLM client: Anthropic + OpenAI-compatible adapters, logged retry/backoff
   evaluator.py      Claude-powered ticket classifier
   auto_deny.py      Deterministic override rules
   writer.py         Persist evaluations to DB
@@ -270,7 +306,7 @@ evaluation/
 analytics/          SQL analysis queries
 reference/          Industry ban-policy reference docs
 config/
-  settings.py       DB connection, ALLOWED_STATUSES, model price table
+  settings.py       DB connection, LLM provider settings, ALLOWED_STATUSES, model price table
 
 tests/              Offline unit tests + opt-in integration tests
   js/               Node tests for web/filters.js
@@ -278,7 +314,7 @@ scripts/
   run_api.cmd          Launch the API + dashboard on Windows
   generate_tickets.py  Synthetic ticket/ban generator for perf testing
   capture_screenshots.py  Regenerates the README screenshots
-  smoke_client.py      Manual live-API smoke test
+  smoke_client.py      Manual live-API smoke test (--provider / --model to try another key)
   smoke_evaluate.py    Manual end-to-end evaluation spot-check
 docs/
   performance-notes.md Performance baseline + scaling analysis
