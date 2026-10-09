@@ -233,15 +233,13 @@ async function changeStatus(ticketId, newStatus) {
 // Derived data (ported from the prototype's renderVals)
 // ---------------------------------------------------------------------------
 
+// The predicates live in filters.js, loaded before this file, so Node can
+// test them without a browser.
 function filteredQueue() {
   const s = state;
-  return s.tickets.filter((t) => {
-    const cat = t.ai_category || 'Not yet evaluated';
-    if (!s.cats[cat]) return false;
-    if (!s.statuses[t.status]) return false;
-    if (t.confidence_score != null && (t.confidence_score < s.confMin || t.confidence_score > s.confMax)) return false;
-    if (s.admittedOnly && t.admitted_cheating !== true) return false;
-    return true;
+  return filterQueue(s.tickets, {
+    cats: s.cats, statuses: s.statuses,
+    confMin: s.confMin, confMax: s.confMax, admittedOnly: s.admittedOnly,
   });
 }
 
