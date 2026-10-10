@@ -19,6 +19,9 @@ htmlcov/
 data/perf_tickets.json
 data/perf_bans.json
 
+# Results files from scripts/compare_models.py
+model-comparison-*.json
+
 # Virtual environments
 venv/
 .venv/

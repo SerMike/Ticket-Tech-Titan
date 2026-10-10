@@ -80,16 +80,19 @@ LLM_MAX_TOKENS = _token_budget(os.getenv("LLM_MAX_TOKENS"))
 # A model missing from this table renders as "price unknown" in the cost view,
 # never as $0.00.
 #
-# Verified against Anthropic's published pricing 2026-08-16. Re-check when
+# Verified against Anthropic's published pricing 2026-10-10. Re-check when
 # adding a model; nothing in the test suite can catch a stale number here.
 # Models reached through LLM_PROVIDER=openai aren't listed until someone
 # verifies their prices the same way; until then, price yours with the
 # PRICE_PER_MTOK_* override below.
 MODEL_PRICES: dict[str, tuple[float, float]] = {
     "claude-sonnet-4-6": (3.00, 15.00),
-    "claude-sonnet-5": (3.00, 15.00),
+    "claude-sonnet-5": (2.00, 10.00),
     "claude-opus-5": (5.00, 25.00),
     "claude-haiku-4-5": (1.00, 5.00),
+    # Haiku 5.5 bills prompts over 100K tokens at 5x these rates. A ticket
+    # evaluation sends about 3K, so this rate is the one that applies.
+    "claude-haiku-5-5": (0.10, 0.50),
 }
 
 # Price MODEL_NAME from .env so a model absent from the table above can be
