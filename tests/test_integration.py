@@ -4,8 +4,9 @@ Skipped by default; run with `pytest -m integration`. Each test seeds a
 uniquely-named throwaway ticket and removes it (and all dependent rows)
 in teardown, so the existing data is never touched.
 
-`test_pipeline_idempotency` additionally requires ANTHROPIC_API_KEY and
-makes two real API calls (one ticket, evaluated twice).
+The two pipeline tests additionally need the configured LLM_PROVIDER's key
+(ANTHROPIC_API_KEY by default) and make real API calls: three in all, as
+`test_pipeline_idempotency` evaluates its ticket twice.
 """
 
 import uuid
@@ -15,10 +16,19 @@ import pytest
 
 from config import settings
 from dashboard import db as dashboard_db
+from evaluation import client
 from evaluation import run_pipeline as rp
 from ingestion.ingest_ticket import ingest_single_ticket
 
 pytestmark = pytest.mark.integration
+
+
+def _require_llm():
+    """Skip unless the configured provider has the key and model it needs."""
+    try:
+        client.get_provider()
+    except RuntimeError as e:
+        pytest.skip(str(e))
 
 
 @pytest.fixture
@@ -69,8 +79,7 @@ def test_ingest_then_query_round_trip(seeded_ticket):
 
 
 def test_pipeline_idempotency(seeded_ticket):
-    if not settings.ANTHROPIC_API_KEY:
-        pytest.skip("ANTHROPIC_API_KEY not set")
+    _require_llm()
     tid = seeded_ticket["ticket_id"]
 
     first = rp.run_pipeline(force=False, ticket_id=tid, limit=None)
@@ -98,8 +107,7 @@ def test_pipeline_persists_token_usage(seeded_ticket):
     columns would still show a green suite while the pipeline failed on every
     ticket.
     """
-    if not settings.ANTHROPIC_API_KEY:
-        pytest.skip("ANTHROPIC_API_KEY not set")
+    _require_llm()
     tid = seeded_ticket["ticket_id"]
 
     stats = rp.run_pipeline(force=False, ticket_id=tid, limit=None)
