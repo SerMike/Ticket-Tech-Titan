@@ -10,8 +10,8 @@ Nothing touches the database. Results go to stdout and to a JSON file
 (model-comparison-<timestamp>.json, gitignored) that holds every call.
 
 This calls the live API and costs money. With the default models a full run
-costs about $0.60, the re-check pass adds at most about $0.40, and the whole
-thing takes 15-25 minutes.
+costs roughly $2-3 (up to about $4 if many tickets need re-checking) and takes
+30-50 minutes, most of both going to claude-sonnet-5-5.
 
 Usage:
     python scripts/compare_models.py
@@ -19,9 +19,11 @@ Usage:
     python scripts/compare_models.py --models claude-sonnet-4-6 claude-haiku-5-5@8000
 
 Each model is NAME or NAME@BUDGET, where BUDGET is its reply budget in tokens
-(LLM_MAX_TOKENS when omitted). By default the baseline is your MODEL_NAME and
-it is compared with claude-haiku-5-5 at two budgets: Haiku 5.5 thinks before
-it answers, and its thinking counts against the budget.
+(LLM_MAX_TOKENS when omitted). By default the baseline is your MODEL_NAME,
+compared with claude-sonnet-5-5 and claude-haiku-5-5 at 8000 tokens, and with
+claude-haiku-5-5 at your configured budget as well. Both newer models think
+before they answer, at their default effort, and the thinking counts against
+the budget.
 
 Reading the results
 -------------------
@@ -62,10 +64,10 @@ SAMPLE_TICKETS = PROJECT_ROOT / "data" / "sample_tickets.json"
 SAMPLE_BANS = PROJECT_ROOT / "data" / "sample_bans.json"
 
 # Compared with the baseline (MODEL_NAME) when --models isn't given.
-DEFAULT_CHALLENGERS = ["claude-haiku-5-5", "claude-haiku-5-5@8000"]
+DEFAULT_CHALLENGERS = ["claude-sonnet-5-5@8000", "claude-haiku-5-5@8000", "claude-haiku-5-5"]
 
 # Most tickets the re-check pass runs again. Bounds its cost: with the
-# default models, about 1.2 cents per ticket per re-check round.
+# default models, about 3-5 cents per ticket per re-check round.
 RECHECK_CAP = 15
 
 # Failure classes, as the report groups them.
@@ -495,8 +497,8 @@ def print_report(summary: dict, specs: list[ModelSpec], samples: list,
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--models", nargs="+", metavar="NAME[@BUDGET]",
-                        help="models to compare, baseline first "
-                             "(default: MODEL_NAME, claude-haiku-5-5, claude-haiku-5-5@8000)")
+                        help="models to compare, baseline first (default: MODEL_NAME, "
+                             f"{', '.join(DEFAULT_CHALLENGERS)})")
     parser.add_argument("--provider", help="override LLM_PROVIDER (anthropic or openai)")
     parser.add_argument("--limit", type=int, help="only the first N tickets")
     parser.add_argument("--recheck", type=int, default=2,

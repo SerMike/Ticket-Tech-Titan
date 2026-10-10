@@ -88,6 +88,7 @@ LLM_MAX_TOKENS = _token_budget(os.getenv("LLM_MAX_TOKENS"))
 MODEL_PRICES: dict[str, tuple[float, float]] = {
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-sonnet-5": (2.00, 10.00),
+    "claude-sonnet-5-5": (2.00, 10.00),
     "claude-opus-5": (5.00, 25.00),
     "claude-haiku-4-5": (1.00, 5.00),
     # Haiku 5.5 bills prompts over 100K tokens at 5x these rates. A ticket
