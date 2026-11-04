@@ -39,7 +39,7 @@ This repository is a from-scratch, rough approximation of the real system that t
 1. **Ingest** — ticket and ban-record JSON exports are validated and loaded into PostgreSQL.
 2. **Evaluate** — Claude reads each appeal against its ban record and returns a summary, reasoning, a category, and a confidence score as JSON.
 3. **Enforce** — deterministic rules override the model whenever the ban record shows a confirmed technical detection.
-4. **Review** — analysts work the prioritized queue in a web dashboard, with analytics and per-decision cost tracking.
+4. **Review** — analysts work the prioritized queue in a web dashboard, with analytics, per-decision cost tracking, and an alert when appeals surge (a likely banwave) and the ban cluster behind it.
 
 Each ticket lands in one of five categories:
 
@@ -94,6 +94,10 @@ flowchart TD
 
 ![Costs page](docs/screenshots/costs.png)
 
+**Surge alert** — when appeals arrive faster than the threshold, the Dashboard names the ban cluster most likely behind them:
+
+![Dashboard page showing the appeal-surge alert](docs/screenshots/dashboard-surge.png)
+
 **Light theme** — follows your OS setting, or the toggle in the top-right:
 
 ![Dashboard page in light mode](docs/screenshots/dashboard-light.png)
@@ -142,6 +146,14 @@ python database/init_db.py            # create schema + categories (drops existi
 python ingestion/ingest_ticket.py --tickets data/sample_tickets.json --bans data/sample_bans.json
 ```
 
+**Try the surge demo (optional).** To see the appeal-surge alert, also load a synthetic banwave:
+
+```bash
+python ingestion/ingest_ticket.py --tickets data/surge_tickets.json --bans data/surge_bans.json
+```
+
+This adds 124 unevaluated tickets, and running the pipeline in step 4 without `--limit` evaluates them too (an extra ~$1–2). The surge is measured against the newest ticket, so loading newer data (e.g. the perf tickets from `generate_tickets.py`) moves the clock past the demo and the alert disappears.
+
 ### 4. Run the AI pipeline
 
 ```bash
@@ -160,7 +172,7 @@ Then visit http://localhost:8000. One FastAPI process serves both the JSON API a
 
 | View | Purpose |
 |------|---------|
-| Dashboard | Summary metrics: open tickets, auto-denies today, needs-review backlog |
+| Dashboard | Summary metrics: open tickets, auto-denies today, needs-review backlog, and an appeal-surge alert |
 | Queue | Ticket table filtered by AI category, status, submission date, confidence, and admitted cheating; click a ticket to read the appeal, ban record, and AI evaluation, and update its status |
 | Analytics | Category breakdown, admission rates, detection methods, volume over time, and confidence distribution |
 | Costs | LLM spend per ticket and per day, cumulative spend, spend by model, and API spend against the analyst time it displaced |
@@ -194,6 +206,8 @@ All settings live in `.env` (see [`.env.example`](.env.example)):
 | `MODEL_NAME` | Model used for evaluation (default `claude-sonnet-4-6`; required for other providers) |
 | `LLM_MAX_TOKENS` | Reply budget per evaluation (default `1024`); raise it for reasoning models |
 | `PRICE_PER_MTOK_INPUT` / `PRICE_PER_MTOK_OUTPUT` | Optional USD-per-million-token prices for a model not in the built-in price table |
+| `SURGE_THRESHOLD` | Tickets within the window that count as an appeal surge (default `100`) |
+| `SURGE_WINDOW_MINUTES` | Length of the surge window in minutes (default `60`) |
 
 A real environment variable takes precedence over `.env`, so you can point a single shell at a different database:
 
@@ -256,6 +270,7 @@ python scripts/smoke_client.py --provider openai --model <model-name>
 | `GET /api/costs?date_from=&date_to=` | LLM spend per day and per model plus totals, priced from stored token counts |
 | `GET /api/stats` | `open_count`, `auto_denied_today`, `needs_review` |
 | `GET /api/date-bounds` | Earliest and latest ticket dates |
+| `GET /api/surge` | Whether an appeal surge is active (`active`, `as_of`, `count`, `threshold`) and, when it is, the top-3 `(ban_date, detection_method)` clusters behind it with their counts and shares |
 
 <p align="right"><a href="#readme-top">↑ Back to top</a></p>
 
@@ -267,6 +282,7 @@ python scripts/smoke_client.py --provider openai --model <model-name>
 - **Idempotent pipeline.** Evaluations UPSERT on `ticket_id` ([`writer.py`](evaluation/writer.py)) and commit per ticket, so re-runs are safe and one bad ticket can't break a batch.
 - **Measured cost.** Each evaluation stores the token counts the API billed ([`client.py`](evaluation/client.py)). Dollars are computed at query time from the price table in [`settings.py`](config/settings.py), so a price correction re-prices all history. Evaluations without usage data show as untracked rather than $0.00.
 - **Offline-testable.** The database layer, LLM client, and orchestration are mockable seams; integration tests are opt-in via `pytest -m integration`.
+- **Surge clock is the data, not the wall clock.** [`surge.py`](dashboard/surge.py) measures the window back from the newest ticket, so results are deterministic and demoable. The trade-off is that stalled ingestion can leave an old surge reading as active; the banner's "as of" stamp mitigates that. A baseline-relative trigger (a multiple of the normal rate rather than a fixed count) is the natural next step.
 - **Performance.** Throughput is ~6.2 s/ticket, almost entirely API-bound; dashboard queries return in 32–45 ms with 550 tickets loaded. Per-ticket commits make the pipeline easy to parallelize. Details in [docs/performance-notes.md](docs/performance-notes.md).
 
 <p align="right"><a href="#readme-top">↑ Back to top</a></p>
@@ -286,6 +302,7 @@ web/                Single-page front-end (no build step)
 dashboard/
   db.py             All DB queries (read + status update) — the API's seam
   cost.py           Token counts → dollars, priced at query time
+  surge.py          Appeal-surge detection — pure, no I/O
 
 database/
   schema.sql        PostgreSQL schema
@@ -313,6 +330,7 @@ tests/              Offline unit tests + opt-in integration tests
 scripts/
   run_api.cmd          Launch the API + dashboard on Windows
   generate_tickets.py  Synthetic ticket/ban generator for perf testing
+  generate_surge.py    Seeded banwave demo data for the surge alert
   capture_screenshots.py  Regenerates the README screenshots
   smoke_client.py      Manual live-API smoke test (--provider / --model to try another key)
   smoke_evaluate.py    Manual end-to-end evaluation spot-check

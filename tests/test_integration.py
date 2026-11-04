@@ -149,3 +149,57 @@ def test_status_update_creates_history_row(seeded_ticket):
         conn.close()
     # Ingestion logs (NULL -> open); the update must add exactly (open -> pending).
     assert rows == [(None, "open"), ("open", "pending")]
+
+
+@pytest.fixture
+def seeded_surge():
+    """Five committed tickets at 2099 (so they are the newest, whatever the
+    database already holds), four of them banned by `integ_wave`.
+
+    Seeding rather than ingesting data/surge_*.json: the surge clock is the
+    newest ticket, so other data in a developer's database could bury it.
+    """
+    suffix = uuid.uuid4().hex[:8].upper()
+    tickets = [
+        {
+            "ticket_id": f"TKT-INTEG-SURGE-{suffix}-{n}",
+            "user_name": "IntegrationTester",
+            "user_id": f"USR-INTEG-SURGE-{suffix}-{n}",
+            "ticket_issue_category": "Request Account Unban",
+            "ticket_title": "Integration surge ticket",
+            "ticket_body": "This ticket was created by the integration test suite.",
+            "status": "open",
+            "created_at": f"2099-01-01T00:0{n}:00",
+        }
+        for n in range(5)
+    ]
+    conn = psycopg2.connect(settings.DATABASE_URL)
+    try:
+        with conn, conn.cursor() as cur:
+            for t in tickets:
+                assert ingest_single_ticket(cur, t) == "inserted"
+            for t in tickets[:4]:
+                cur.execute(
+                    "INSERT INTO ban_database (user_id, ban_reason, "
+                    "detection_method, ban_duration, ban_date) "
+                    "VALUES (%s, %s, %s, %s, %s)",
+                    (t["user_id"], "Integration test ban", "integ_wave",
+                     "permanent", "2098-12-31"),
+                )
+        yield tickets
+    finally:
+        with conn, conn.cursor() as cur:
+            ids = [t["ticket_id"] for t in tickets]
+            cur.execute("DELETE FROM ticket_status_history WHERE ticket_id = ANY(%s)", (ids,))
+            cur.execute("DELETE FROM support_tickets WHERE ticket_id = ANY(%s)", (ids,))
+            cur.execute("DELETE FROM ban_database WHERE user_id = ANY(%s)",
+                        ([t["user_id"] for t in tickets],))
+        conn.close()
+
+
+def test_surge_detected_end_to_end(seeded_surge):
+    out = dashboard_db.get_surge(threshold=5, window_minutes=60)
+
+    assert out["active"] is True and out["count"] == 5
+    assert out["top_cause"]["detection_method"] == "integ_wave"
+    assert out["top_cause"]["share"] == 0.8
