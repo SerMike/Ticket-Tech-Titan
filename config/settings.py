@@ -73,6 +73,31 @@ def _token_budget(raw: str | None) -> int:
 # they answer, so they need more; see "Using other models" in the README.
 LLM_MAX_TOKENS = _token_budget(os.getenv("LLM_MAX_TOKENS"))
 
+
+def _positive_int(name: str, raw: str | None, default: int) -> int:
+    """Parse a positive whole-number setting, returning default when unset.
+
+    A bad value fails at startup, naming the variable.
+    """
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        value = 0
+    if value < 1:
+        raise RuntimeError(f"{name} must be a positive whole number, got {raw!r}.")
+    return value
+
+
+# Appeal-surge alert: fire when SURGE_THRESHOLD or more tickets arrive within
+# SURGE_WINDOW_MINUTES of the newest ticket. See the README's surge-detection
+# section for how the alert behaves.
+SURGE_THRESHOLD = _positive_int("SURGE_THRESHOLD", os.getenv("SURGE_THRESHOLD"), 100)
+SURGE_WINDOW_MINUTES = _positive_int(
+    "SURGE_WINDOW_MINUTES", os.getenv("SURGE_WINDOW_MINUTES"), 60
+)
+
 # LLM pricing — USD per million tokens, as (input, output), keyed by model.
 #
 # Cost is computed from these at query time rather than stored, so correcting a

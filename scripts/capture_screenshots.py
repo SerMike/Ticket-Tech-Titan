@@ -9,11 +9,20 @@ localStorage holds no choice, which is why each theme gets its own context.
 
 Requires the API running on localhost:8000 (``uvicorn api.main:app``)
 and a local Edge install (uses Playwright's channel="msedge", no browser
-download).
+download). Pass --channel "" to use Playwright's bundled chromium instead.
 
     python scripts/capture_screenshots.py
+
+With --surge it captures only dashboard-surge.png (the Dashboard in dark
+mode, showing the appeal-surge banner) and leaves the other screenshots
+alone. Load the surge demo data first (see the README); the other
+screenshots come from an evaluated database, so don't regenerate them
+from one holding unevaluated surge tickets.
+
+    python scripts/capture_screenshots.py --surge
 """
 
+import argparse
 import sys
 import time
 from pathlib import Path
@@ -48,10 +57,23 @@ def new_page(browser, scheme):
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--surge", action="store_true",
+                        help="capture only dashboard-surge.png")
+    parser.add_argument("--channel", default="msedge",
+                        help='browser channel (default msedge; "" = bundled chromium)')
+    args = parser.parse_args()
+
     OUT.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
-        browser = p.chromium.launch(channel="msedge", headless=True)
+        browser = p.chromium.launch(channel=args.channel or None, headless=True)
         page = new_page(browser, "dark")
+
+        if args.surge:
+            page.screenshot(path=str(OUT / "dashboard-surge.png"), full_page=True)
+            print("dashboard-surge.png")
+            browser.close()
+            return 0
 
         # --- Queue: hide unevaluated tickets so AI categories show, then
         # select a visible row so the detail panel shows a real evaluation

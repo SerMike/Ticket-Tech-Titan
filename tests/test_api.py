@@ -203,3 +203,12 @@ def test_root_serves_the_front_end(client):
 
     assert res.status_code == 200
     assert "Ticket Tech Titan" in res.text
+
+
+def test_surge_passes_db_result_through(client, monkeypatch):
+    payload = {"active": False, "count": 0, "causes": []}
+    monkeypatch.setattr(main.db, "get_surge", Mock(return_value=payload))
+
+    res = client.get("/api/surge")
+
+    assert res.status_code == 200 and res.json() == payload

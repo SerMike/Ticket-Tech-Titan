@@ -1,0 +1,830 @@
+{
+ "bans": [
+  {
+   "user_id": "USR-SURGE-00001",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00002",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00003",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00004",
+   "ban_reason": "Server-side aim-lock detection triggered repeatedly",
+   "detection_method": "aim_lock_detection",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-08"
+  },
+  {
+   "user_id": "USR-SURGE-00006",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00007",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00008",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00009",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00010",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00011",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00012",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00013",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00014",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00015",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00016",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00017",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00018",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00019",
+   "ban_reason": "Movement speed exceeded engine limits in ranked play",
+   "detection_method": "speed_hack",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-07"
+  },
+  {
+   "user_id": "USR-SURGE-00020",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00021",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00023",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00024",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00025",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00026",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00028",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00029",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00030",
+   "ban_reason": "Malicious packet manipulation detected",
+   "detection_method": "connection_manipulation",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-06"
+  },
+  {
+   "user_id": "USR-SURGE-00031",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00032",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00033",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00034",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00035",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00036",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00037",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00038",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00039",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00040",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00041",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00042",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00043",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00044",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00045",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00046",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00047",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00048",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00049",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00050",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00051",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00052",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00053",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00054",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00055",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00056",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00057",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00058",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00059",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00060",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00061",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00062",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00063",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00064",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00065",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00066",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00067",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00068",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00069",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00070",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00071",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00074",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00075",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00076",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00077",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00078",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00079",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00080",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00081",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00082",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00083",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00084",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00085",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00086",
+   "ban_reason": "Server-side aim-lock detection triggered repeatedly",
+   "detection_method": "aim_lock_detection",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-03"
+  },
+  {
+   "user_id": "USR-SURGE-00087",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00088",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00089",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00090",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00091",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00092",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00093",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00094",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00095",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00096",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00097",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00098",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00099",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00101",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00102",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00103",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00104",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00105",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00106",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00107",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00108",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00109",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00110",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00111",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00112",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00113",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00114",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00115",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00116",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00117",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00118",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00119",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00120",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00121",
+   "ban_reason": "Cheat engine signature detected during live match",
+   "detection_method": "cheat_engine_detection",
+   "ban_duration": "90 days",
+   "ban_date": "2026-04-09"
+  },
+  {
+   "user_id": "USR-SURGE-00122",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00123",
+   "ban_reason": "Statistical anomaly in accuracy and reaction times",
+   "detection_method": "stat_anomaly",
+   "ban_duration": "30 days",
+   "ban_date": "2026-04-10"
+  },
+  {
+   "user_id": "USR-SURGE-00124",
+   "ban_reason": "Banned after manual review of player reports",
+   "detection_method": "manual_review",
+   "ban_duration": "permanent",
+   "ban_date": "2026-04-05"
+  }
+ ]
+}
