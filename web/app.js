@@ -40,6 +40,8 @@ const state = {
   // in config/settings.py. costRangeKey doubles as cache key and in-flight
   // marker, the same trick evaluations[id] = null uses.
   costs: null, costsError: '', costRangeKey: null,
+  // Appeal-surge status from /api/surge; surgeError mirrors costsError.
+  surge: null, surgeError: '',
   analystRate: CONFIG.analystHourlyRate,
   minutesSaved: CONFIG.minutesSavedPerTicket,
 };
@@ -183,7 +185,18 @@ async function ensureCosts() {
   }
 }
 
+async function loadSurge() {
+  try {
+    const res = await fetch('/api/surge');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    setState({ surge: await res.json(), surgeError: '' });
+  } catch (err) {
+    setState({ surge: null, surgeError: err.message });
+  }
+}
+
 async function loadInitial() {
+  loadSurge();  // in parallel with the tickets; never throws
   const tickets = await fetchTickets();
   const b = dateBounds(tickets);
   setState({
@@ -195,6 +208,7 @@ async function loadInitial() {
 }
 
 async function refreshData() {
+  loadSurge();  // in parallel with the tickets; never throws
   try {
     const tickets = await fetchTickets();
     const stillThere = tickets.some((t) => t.ticket_id === state.selectedId);
@@ -287,6 +301,36 @@ function renderNav() {
     + '</nav></div>';
 }
 
+function surgeSummary(surge) {
+  const top = surge.top_cause;
+  const pct = top ? Math.round(top.share * 100) : 0;
+  const cause = !top ? 'unknown'
+    : top.ban_date ? top.detection_method + ' bans on ' + top.ban_date
+    : top.detection_method;
+  return surge.count + ' appeals in the last ' + surge.window_minutes + ' min \u2014 threshold is '
+    + surge.threshold + '. Likely cause: ' + cause + ' (' + pct + '% of the surge).';
+}
+
+function surgeBanner() {
+  const s = state;
+  if (s.surgeError) {
+    return '<p class="text-muted" style="margin-top: var(--space-6);">Surge check unavailable: ' + esc(s.surgeError) + '</p>';
+  }
+  if (!s.surge || !s.surge.active) return '';
+  const sg = s.surge;
+  const asOf = sg.as_of ? sg.as_of.slice(0, 16).replace('T', ' ') : '';
+  const others = (sg.causes || []).slice(1).map((c) =>
+    c.detection_method + (c.ban_date ? ' \u00b7 ' + c.ban_date : '') + ' (' + Math.round(c.share * 100) + '%)');
+  return '<div class="blueprint" style="padding: var(--space-4) var(--space-6); margin-top: var(--space-6); background: var(--status-deny-bg); color: var(--status-deny-fg);">' + CORNERS
+    + '<div style="display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4);">'
+    + '<h5 style="margin: 0;">Appeal surge</h5>'
+    + '<span class="text-muted">as of ' + esc(asOf) + '</span>'
+    + '</div>'
+    + '<p style="margin: var(--space-2) 0 0;">' + esc(surgeSummary(sg)) + '</p>'
+    + (others.length ? '<p class="text-muted" style="margin: var(--space-2) 0 0;">Also: ' + esc(others.join(', ')) + '</p>' : '')
+    + '</div>';
+}
+
 function renderDashboard() {
   const s = state;
   const openCount = s.tickets.filter((t) => t.status === 'open').length;
@@ -303,6 +347,7 @@ function renderDashboard() {
     + '<h6 style="color: var(--color-accent);">Overview</h6>'
     + '<h1 style="margin-bottom: var(--space-2);">Dashboard</h1>'
     + '<p class="text-muted" style="max-width: 560px;">Overview of the ticket queue and recent AI activity. Use the navigation above to open the queue or the analytics page.</p>'
+    + surgeBanner()
     + '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8);">'
     + cards.map((card) =>
       '<div class="card blueprint" style="padding: var(--space-6); gap: var(--space-3);">' + CORNERS
@@ -516,11 +561,20 @@ function renderAnalytics() {
     y: (Y0 - (Y0 - Y1) * c / volMax).toFixed(1),
   }));
   const volPoints = volDots.map((p) => p.x + ',' + p.y).join(' ');
+  // Surge marker: only when active and the surge day is inside the range.
+  const surgeIdx = s.surge && s.surge.active && s.surge.as_of
+    ? volEntries.findIndex((e) => e[0] === s.surge.as_of.slice(0, 10)) : -1;
+  const surgeX = surgeIdx >= 0 ? volDots[surgeIdx].x : null;
+  const surgeMark = surgeIdx >= 0
+    ? '<line x1="' + surgeX + '" y1="10" x2="' + surgeX + '" y2="190" stroke="var(--status-deny)" stroke-width="1.5" stroke-dasharray="3 3"><title>' + esc(surgeSummary(s.surge)) + '</title></line>'
+      + '<text x="' + surgeX + '" y="8" font-size="10" fill="var(--status-deny)" text-anchor="' + (surgeX > 560 ? 'end' : 'middle') + '">SURGE</text>'
+    : '';
   const volSvg = '<svg viewBox="0 0 600 220" style="width: 100%; display: block;">'
     + '<line x1="36" y1="190" x2="592" y2="190" stroke="var(--color-divider)" stroke-width="1"></line>'
     + '<line x1="36" y1="10" x2="36" y2="190" stroke="var(--color-divider)" stroke-width="1"></line>'
     + '<polyline points="' + volPoints + '" fill="none" stroke="var(--color-accent)" stroke-width="1.5"></polyline>'
-    + volDots.map((d) => '<circle cx="' + d.x + '" cy="' + d.y + '" r="2.5" fill="var(--color-accent)"></circle>').join('')
+    + volDots.map((d, i) => '<circle cx="' + d.x + '" cy="' + d.y + '" r="2.5" fill="' + (i === surgeIdx ? 'var(--status-deny)' : 'var(--color-accent)') + '"></circle>').join('')
+    + surgeMark
     + '<text x="36" y="208" font-size="10" fill="currentColor" opacity="0.55">' + (volEntries.length ? volEntries[0][0] : '') + '</text>'
     + '<text x="592" y="208" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">' + (volEntries.length ? volEntries[volEntries.length - 1][0] : '') + '</text>'
     + '<text x="30" y="14" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">' + volMax + '</text>'
