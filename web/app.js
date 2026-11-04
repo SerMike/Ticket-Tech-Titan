@@ -565,9 +565,12 @@ function renderAnalytics() {
   const surgeIdx = s.surge && s.surge.active && s.surge.as_of
     ? volEntries.findIndex((e) => e[0] === s.surge.as_of.slice(0, 10)) : -1;
   const surgeX = surgeIdx >= 0 ? volDots[surgeIdx].x : null;
+  const surgeAnchor = surgeX < 60 ? 'start' : (surgeX > 560 ? 'end' : 'middle');
   const surgeMark = surgeIdx >= 0
-    ? '<line x1="' + surgeX + '" y1="10" x2="' + surgeX + '" y2="190" stroke="var(--status-deny)" stroke-width="1.5" stroke-dasharray="3 3"><title>' + esc(surgeSummary(s.surge)) + '</title></line>'
-      + '<text x="' + surgeX + '" y="8" font-size="10" fill="var(--status-deny)" text-anchor="' + (surgeX > 560 ? 'end' : 'middle') + '">SURGE</text>'
+    ? '<g><title>' + esc(surgeSummary(s.surge)) + '</title>'
+      + '<line x1="' + surgeX + '" y1="10" x2="' + surgeX + '" y2="190" stroke="transparent" stroke-width="12"></line>'
+      + '<line x1="' + surgeX + '" y1="10" x2="' + surgeX + '" y2="190" stroke="var(--status-deny)" stroke-width="1.5" stroke-dasharray="3 3"></line>'
+      + '<text x="' + surgeX + '" y="8" font-size="10" fill="var(--status-deny)" text-anchor="' + surgeAnchor + '">SURGE</text></g>'
     : '';
   const volSvg = '<svg viewBox="0 0 600 220" style="width: 100%; display: block;">'
     + '<line x1="36" y1="190" x2="592" y2="190" stroke="var(--color-divider)" stroke-width="1"></line>'

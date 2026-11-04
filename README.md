@@ -154,6 +154,8 @@ python ingestion/ingest_ticket.py --tickets data/surge_tickets.json --bans data/
 
 This adds 124 unevaluated tickets, and running the pipeline in step 4 without `--limit` evaluates them too (an extra ~$1–2). The surge is measured against the newest ticket, so loading newer data (e.g. the perf tickets from `generate_tickets.py`) moves the clock past the demo and the alert disappears.
 
+To return to the base sample, re-run `python database/init_db.py` (it drops every table) and re-ingest the base sample with the first ingest command in this step.
+
 ### 4. Run the AI pipeline
 
 ```bash

@@ -23,12 +23,6 @@ def test_positive_int_rejects_bad_values_naming_the_variable(raw):
         settings._positive_int("SURGE_THRESHOLD", raw, 100)
 
 
-def test_surge_defaults():
-    # Holds while .env leaves both unset, as .env.example does.
-    assert settings.SURGE_THRESHOLD == 100
-    assert settings.SURGE_WINDOW_MINUTES == 60
-
-
 AS_OF = datetime(2026, 4, 11, 9, 48)
 D09 = date(2026, 4, 9)
 D10 = date(2026, 4, 10)
@@ -97,7 +91,7 @@ def test_top_three_only():
     assert len(surge.detect(rows, AS_OF, 4, 60)["causes"]) == 3
 
 
-# Review Focus 1-3
+# Clock moves to a later quiet ticket; repeat appeals each count; tickets at the exact as_of second count.
 def test_later_quiet_ticket_moves_the_clock_past_the_surge():
     rows = [r(0, D10, "stat_anomaly")] * 5
     later = AS_OF + timedelta(days=60)
@@ -139,7 +133,7 @@ def _demo_rows():
 def test_demo_dataset_triggers_the_stat_anomaly_surge():
     rows = _demo_rows()
     as_of = max(r["created_at"] for r in rows)
-    out = surge.detect(rows, as_of, settings.SURGE_THRESHOLD, settings.SURGE_WINDOW_MINUTES)
+    out = surge.detect(rows, as_of, 100, 60)  # the shipped defaults, independent of env
     assert out["active"] is True
     assert (out["top_cause"]["detection_method"], out["top_cause"]["ban_date"]) == ("stat_anomaly", date(2026, 4, 10))
 
