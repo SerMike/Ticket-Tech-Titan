@@ -1,4 +1,7 @@
+import importlib.util
+import json
 from datetime import date, datetime, timedelta
+from pathlib import Path
 
 import pytest
 from config import settings
@@ -108,3 +111,47 @@ def test_repeat_appeals_from_one_player_each_count():
 
 def test_all_tickets_at_the_as_of_second_count():
     assert surge.detect([r(0, D10, "x")] * 4, AS_OF, 4, 60)["count"] == 4
+
+
+DATA = Path(__file__).resolve().parent.parent / "data"
+
+
+def _load_generate_surge():
+    path = DATA.parent / "scripts" / "generate_surge.py"
+    spec = importlib.util.spec_from_file_location("generate_surge", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _demo_rows():
+    tickets = json.loads((DATA / "surge_tickets.json").read_text())["tickets"]
+    bans = {b["user_id"]: b for b in json.loads((DATA / "surge_bans.json").read_text())["bans"]}
+    rows = []
+    for t in tickets:
+        b = bans.get(t["user_id"])
+        rows.append({"created_at": datetime.fromisoformat(t["created_at"]),
+                     "ban_date": date.fromisoformat(b["ban_date"]) if b else None,
+                     "detection_method": b["detection_method"] if b else None})
+    return rows
+
+
+def test_demo_dataset_triggers_the_stat_anomaly_surge():
+    rows = _demo_rows()
+    as_of = max(r["created_at"] for r in rows)
+    out = surge.detect(rows, as_of, settings.SURGE_THRESHOLD, settings.SURGE_WINDOW_MINUTES)
+    assert out["active"] is True
+    assert (out["top_cause"]["detection_method"], out["top_cause"]["ban_date"]) == ("stat_anomaly", date(2026, 4, 10))
+
+
+def test_demo_dataset_is_newer_than_the_base_sample():
+    base = json.loads((DATA / "sample_tickets.json").read_text())["tickets"]
+    surge_t = json.loads((DATA / "surge_tickets.json").read_text())["tickets"]
+    assert min(t["created_at"] for t in surge_t) > max(t["created_at"] for t in base)
+
+
+def test_committed_demo_files_match_the_generator():
+    gen = _load_generate_surge()
+    tickets, bans = gen.generate()
+    assert {"tickets": tickets} == json.loads((DATA / "surge_tickets.json").read_text())
+    assert {"bans": bans} == json.loads((DATA / "surge_bans.json").read_text())
