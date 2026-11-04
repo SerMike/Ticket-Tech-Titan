@@ -15,7 +15,7 @@ out of sync.
 """
 
 import sys
-from datetime import date as _date
+from datetime import date as _date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -28,8 +28,9 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 from psycopg2.extras import RealDictCursor  # noqa: E402
 
+from config import settings  # noqa: E402
 from config.settings import ALLOWED_STATUSES, get_connection  # noqa: E402
-from dashboard import cost  # noqa: E402
+from dashboard import cost, surge  # noqa: E402
 
 __all__ = [
     "ALLOWED_STATUSES",
@@ -42,6 +43,7 @@ __all__ = [
     "get_cost_data",
     "get_summary_stats",
     "get_ticket_date_bounds",
+    "get_surge",
 ]
 
 
@@ -523,6 +525,51 @@ def _fold_cost_groups(groups: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         "totals": totals,
     }
+
+
+# ---------------------------------------------------------------------------
+# Appeal surge
+# ---------------------------------------------------------------------------
+
+# Tickets inside the window. The bounds are half-open on the left to match
+# surge.detect, so the query and the pure function agree on window membership.
+_SURGE_ROWS_SQL = """
+    SELECT st.created_at, bd.ban_date, bd.detection_method
+    FROM support_tickets st
+    LEFT JOIN ban_database bd ON bd.user_id = st.user_id
+    WHERE st.created_at > %s AND st.created_at <= %s
+"""
+
+
+def get_surge(
+    threshold: int | None = None,
+    window_minutes: int | None = None,
+) -> dict[str, Any]:
+    """Return the appeal-surge verdict for the window ending at the newest ticket.
+
+    The window is anchored to ``MAX(created_at)`` rather than the wall clock,
+    so the verdict describes the data, not the moment the page was loaded.
+    ``None`` arguments fall back to ``settings``, read at call time so that
+    overrides and monkeypatches take effect.
+    """
+    if threshold is None:
+        threshold = settings.SURGE_THRESHOLD
+    if window_minutes is None:
+        window_minutes = settings.SURGE_WINDOW_MINUTES
+
+    conn = get_connection(autocommit=True)
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("SELECT MAX(created_at) AS as_of FROM support_tickets")
+            as_of = cur.fetchone()["as_of"]
+            if as_of is None:
+                return surge.detect([], None, threshold, window_minutes)
+            window_start = as_of - timedelta(minutes=window_minutes)
+            cur.execute(_SURGE_ROWS_SQL, (window_start, as_of))
+            rows = cur.fetchall()
+        return surge.detect(rows, as_of, threshold, window_minutes)
+    finally:
+        conn.close()
 
 
 def get_ticket_date_bounds() -> tuple[_date, _date]:

@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -290,3 +290,32 @@ def test_get_ticket_date_bounds_falls_back_when_table_empty(monkeypatch):
 
     assert end == date.today()
     assert start == date.today() - timedelta(days=90)
+
+
+# ---------------------------------------------------------------------------
+# Appeal surge
+# ---------------------------------------------------------------------------
+
+def test_get_surge_empty_table(monkeypatch):
+    conn, cur = _mock_conn(monkeypatch)
+    cur.fetchone.return_value = {"as_of": None}
+
+    out = db.get_surge()
+
+    assert out["active"] is False and out["as_of"] is None
+    assert cur.execute.call_count == 1  # no window query when there's nothing
+    conn.close.assert_called_once()
+
+
+def test_get_surge_queries_the_window_and_detects(monkeypatch):
+    _, cur = _mock_conn(monkeypatch)
+    as_of = datetime(2026, 4, 11, 9, 48)
+    cur.fetchone.return_value = {"as_of": as_of}
+    cur.fetchall.return_value = [{"created_at": as_of, "ban_date": date(2026, 4, 10),
+                                  "detection_method": "stat_anomaly"}] * 2
+
+    out = db.get_surge(threshold=2, window_minutes=60)
+
+    assert out["active"] is True and out["count"] == 2
+    _, params = cur.execute.call_args.args
+    assert params == (as_of - timedelta(minutes=60), as_of)
